@@ -1,0 +1,37 @@
+# Nivel 1 - Configuración original (basada en The World's Hardest Game nivel 1)
+# Formato: TIPO;parámetros separados por ;
+# Las líneas que empiezan con # son comentarios
+#
+# TABLERO   ancho;alto
+# ZONA      INICIO|FIN|INTERMEDIA;posX;posY;ancho;alto
+# PARED     posX;posY;ancho;alto
+# ENEMIGO   BASICO|ACELERADO;posX;posY;dx;dy;limIzq;limDer;limSup;limInf
+# ENEMIGO   DESLIZADORV;posX;posY;limSup;limInf
+# MONEDA    AMARILLA;posX;posY
+# MONEDA    SKIN;ROJO|AZUL|VERDE;posX;posY
+# ELEMENTO  BOMBA|FUENTE;posX;posY
+
+NIVEL;1
+TIEMPO;90
+TABLERO;800;558
+
+# Zonas seguras: una a cada extremo del corredor central
+ZONA;INICIO;20;190;120;180
+ZONA;FIN;660;190;120;180
+
+# Paredes internas: rellenan la franja superior e inferior entre las dos zonas,
+# dejando un pasillo horizontal de 520x180 entre y=190 e y=370.
+PARED;140;10;520;180
+PARED;140;370;520;178
+
+# Enemigos: patrullan el corredor de izquierda a derecha alternando filas
+ENEMIGO;BASICO;160;205;4;0;145;655;190;370
+ENEMIGO;BASICO;620;245;-4;0;145;655;190;370
+ENEMIGO;BASICO;160;285;4;0;145;655;190;370
+ENEMIGO;BASICO;620;325;-4;0;145;655;190;370
+
+# Monedas amarillas distribuidas en el corredor (todas obligatorias)
+MONEDA;AMARILLA;220;270
+MONEDA;AMARILLA;330;270
+MONEDA;AMARILLA;440;270
+MONEDA;AMARILLA;550;270

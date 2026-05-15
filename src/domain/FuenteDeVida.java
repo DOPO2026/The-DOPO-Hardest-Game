@@ -8,7 +8,10 @@ public class FuenteDeVida extends Elemento {
     }
 
     public void activar(Jugador jugador) {
-        if (!usada) usada = true;
+        if (!usada) {
+            usada = true;
+            jugador.agregarEscudo();
+        }
     }
 
     @Override
