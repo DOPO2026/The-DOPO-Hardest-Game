@@ -7,9 +7,10 @@ public abstract class Moneda extends Elemento {
         super(posX, posY, ancho, alto);
     }
 
-    // Constructor sin args para subclases stub
-    protected Moneda() {}
+    public void recolectar()         { recolectada = true; }
+    public void reiniciar()          { recolectada = false; }
+    public boolean estaRecolectada() { return recolectada; }
 
-    public void recolectar()             { recolectada = true; }
-    public boolean estaRecolectada()     { return recolectada; }
+    @Override
+    public boolean estaActivo() { return !recolectada; }
 }

@@ -17,23 +17,28 @@ public class GamePanel extends JPanel {
         setBackground(Color.DARK_GRAY);
     }
 
+    public void ajustarTamanio(int ancho, int alto) {
+        setPreferredSize(new Dimension(ancho * escala, alto * escala));
+        revalidate();
+    }
+
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         Nivel nivel = juego.getNivelActual();
         if (nivel == null) return;
 
-        // Fondo del tablero
-        g.setColor(new Color(185, 185, 185));
+        g.setColor(new Color(185, 185, 215));
         g.fillRect(0, 0, getWidth(), getHeight());
 
-        for (Zona z   : nivel.getZonas())    render.dibujarZonaSegura(g, z, escala);
-        for (Pared p  : nivel.getParedes())  render.dibujarPared(g, p, escala);
-        for (Moneda m : nivel.getMonedas())  render.dibujarMoneda(g, m, escala);
-        for (Enemigo e: nivel.getEnemigos()) render.dibujarEnemigo(g, e, escala);
+        for (Zona z          : nivel.getZonas())    render.dibujarZonaSegura(g, z, escala);
+        for (Pared p         : nivel.getParedes())  render.dibujarPared(g, p, escala);
+        for (FuenteDeVida f  : nivel.getFuentes())  render.dibujarFuente(g, f, escala);
+        for (Bomba b         : nivel.getBombas())   render.dibujarBomba(g, b, escala);
+        for (Moneda m        : nivel.getMonedas())  render.dibujarMoneda(g, m, escala);
+        for (Enemigo e       : nivel.getEnemigos()) render.dibujarEnemigo(g, e, escala);
         render.dibujarTodosJugadores(g, nivel.getJugadores(), escala);
 
-        // Overlay de pausa
         if (juego.getEstado() == EstadoJuego.PAUSADO) {
             g.setColor(new Color(0, 0, 0, 130));
             g.fillRect(0, 0, getWidth(), getHeight());
@@ -44,7 +49,6 @@ public class GamePanel extends JPanel {
             g.drawString("ESC para continuar", getWidth() / 2 - 85, getHeight() / 2 + 35);
         }
 
-        // Overlay de victoria / derrota
         EstadoJuego estado = juego.getEstado();
         if (estado == EstadoJuego.VICTORIA || estado == EstadoJuego.DERROTA) {
             g.setColor(new Color(0, 0, 0, 150));
@@ -55,7 +59,7 @@ public class GamePanel extends JPanel {
             g.drawString(msg, getWidth() / 2 - 100, getHeight() / 2);
             g.setFont(new Font("Arial", Font.PLAIN, 18));
             g.setColor(Color.WHITE);
-            g.drawString("R para reiniciar", getWidth() / 2 - 70, getHeight() / 2 + 35);
+            g.drawString("R: reiniciar  |  M: menú", getWidth() / 2 - 110, getHeight() / 2 + 35);
         }
     }
 

@@ -1,0 +1,47 @@
+# Nivel 2 - Zigzag vertical de arriba hacia abajo con checkpoint
+#
+# Layout (de arriba a abajo):
+#   INICIO (centrado arriba)
+#   Corredor 1  →   (sale por la derecha)
+#   Corredor 2  ←   (sale por la izquierda)
+#     ↳ CHECKPOINT al entrar a Corredor 3
+#   Corredor 3  →   (sale por la derecha)
+#   Corredor 4  ←   (entra a FIN, centrado abajo)
+
+NIVEL;2
+TIEMPO;90
+TABLERO;800;558
+
+# Zonas
+ZONA;INICIO;340;10;120;100
+ZONA;INTERMEDIA;20;295;70;50
+ZONA;FIN;340;440;120;108
+
+# Bloques que rodean a INICIO y FIN (dejan sólo la apertura hacia el corredor)
+PARED;10;10;330;100
+PARED;460;10;330;100
+PARED;10;440;330;108
+PARED;460;440;330;108
+
+# Divisores zigzag entre corredores (gaps de 60 px que alternan lado)
+PARED;10;170;720;30
+PARED;70;260;720;30
+PARED;10;350;720;30
+
+# Enemigos: uno por corredor con velocidad y dirección alternadas
+ENEMIGO;BASICO;50;130;4;0;15;785;115;165
+ENEMIGO;BASICO;700;215;-5;0;15;785;205;255
+ENEMIGO;BASICO;130;305;3;0;100;785;295;345
+ENEMIGO;BASICO;700;395;-4;0;15;785;385;435
+
+# Monedas amarillas distribuidas en cada corredor
+MONEDA;AMARILLA;220;135
+MONEDA;AMARILLA;520;135
+MONEDA;AMARILLA;620;225
+MONEDA;AMARILLA;300;225
+MONEDA;AMARILLA;500;315
+MONEDA;AMARILLA;200;405
+MONEDA;AMARILLA;540;405
+
+# Moneda-skin verde (Clyde) en el corredor inferior — escudo extra antes del FIN
+MONEDA;SKIN;VERDE;640;405

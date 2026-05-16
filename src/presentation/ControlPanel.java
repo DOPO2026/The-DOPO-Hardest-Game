@@ -9,27 +9,34 @@ import java.util.List;
 public class ControlPanel extends JPanel {
     private TheDOPOHardestGame juego;
     private JLabel lblTiempo;
-    private List<JLabel> lblMuertes;
     private JLabel lblMonedas;
     private JLabel lblEstadoJuego;
     private JLabel lblMensaje;
+    private JPanel panelStatsJugadores;
+    private List<JLabel> lblMuertes;
+    private List<JLabel> lblVidas;
 
     public ControlPanel(TheDOPOHardestGame juego) {
         this.juego = juego;
         lblMuertes = new ArrayList<>();
-        setLayout(new FlowLayout(FlowLayout.LEFT, 18, 6));
+        lblVidas   = new ArrayList<>();
+        setLayout(new FlowLayout(FlowLayout.LEFT, 14, 6));
         setBackground(new Color(18, 18, 28));
         setPreferredSize(new Dimension(800, 42));
 
-        lblTiempo      = etiqueta("Tiempo: --");
-        JLabel lbl1    = etiqueta("Muertes J1: 0");
-        lblMonedas     = etiqueta("Monedas: 0/0");
-        lblEstadoJuego = etiqueta("Estado: MENU");
-        lblMensaje     = etiqueta("WASD: mover  |  ESC: pausa  |  R: reiniciar");
+        lblTiempo           = etiqueta("Tiempo: --");
+        panelStatsJugadores = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
+        panelStatsJugadores.setOpaque(false);
+        lblMonedas          = etiqueta("Monedas: 0/0");
+        lblEstadoJuego      = etiqueta("Estado: MENU");
+        lblMensaje          = etiqueta("WASD: mover  |  ESC: pausa  |  R: reiniciar  |  M: menú");
         lblMensaje.setForeground(new Color(160, 160, 160));
 
-        lblMuertes.add(lbl1);
-        for (JLabel l : new JLabel[]{lblTiempo, lbl1, lblMonedas, lblEstadoJuego, lblMensaje}) add(l);
+        add(lblTiempo);
+        add(panelStatsJugadores);
+        add(lblMonedas);
+        add(lblEstadoJuego);
+        add(lblMensaje);
     }
 
     private JLabel etiqueta(String texto) {
@@ -39,10 +46,27 @@ public class ControlPanel extends JPanel {
         return l;
     }
 
-    public void actualizarEstado(double tiempo, List<Integer> muertesPorJugador, int monedas, int total) {
+    private void asegurarFilasJugadores(int n) {
+        while (lblMuertes.size() < n) {
+            int idx = lblMuertes.size() + 1;
+            JLabel lm = etiqueta("M J" + idx + ": 0");
+            JLabel lv = etiqueta("♥ J" + idx + ": 1");
+            lv.setForeground(new Color(255, 120, 120));
+            lblMuertes.add(lm);
+            lblVidas.add(lv);
+            panelStatsJugadores.add(lm);
+            panelStatsJugadores.add(lv);
+        }
+        panelStatsJugadores.revalidate();
+    }
+
+    public void actualizarEstado(double tiempo, List<Integer> muertesPorJugador,
+                                 List<Integer> vidasPorJugador, int monedas, int total) {
         lblTiempo.setText(String.format("T: %.0fs", tiempo));
-        for (int i = 0; i < Math.min(muertesPorJugador.size(), lblMuertes.size()); i++) {
-            lblMuertes.get(i).setText("Muertes J" + (i + 1) + ": " + muertesPorJugador.get(i));
+        asegurarFilasJugadores(muertesPorJugador.size());
+        for (int i = 0; i < muertesPorJugador.size(); i++) {
+            lblMuertes.get(i).setText("M J" + (i + 1) + ": " + muertesPorJugador.get(i));
+            lblVidas.get(i).setText("♥ J" + (i + 1) + ": " + vidasPorJugador.get(i));
         }
         lblMonedas.setText("Monedas: " + monedas + "/" + total);
         lblEstadoJuego.setText("Estado: " + juego.getEstado());

@@ -10,67 +10,86 @@ public class TheDOPOHardestGame {
     private Nivel nivelActual;
     private MotorJuego motor;
     private List<ControlHumano> controles;
+    private String rutaNivelActual;
+    private List<Skin> skinsConfiguradas;
+    private List<ColorJuego> coloresConfigurados;
 
     public TheDOPOHardestGame() {
-        motor = new MotorJuego();
-        controles = new ArrayList<>();
-        estado = EstadoJuego.MENU;
-        modo = ModoJuego.UN_JUGADOR;
+        motor               = new MotorJuego();
+        controles           = new ArrayList<>();
+        estado              = EstadoJuego.MENU;
+        modo                = ModoJuego.PLAYER;
+        skinsConfiguradas   = new ArrayList<>();
+        coloresConfigurados = new ArrayList<>();
     }
 
-    /** Inicializa y arranca una partida nueva en el modo indicado. */
-    public void iniciar(ModoJuego modo) {
-        this.modo = modo;
-        tiempoTranscurrido = 0;
-        nivelActual = construirNivelDemo(modo);
+    /**
+     * Inicia una partida cargando el nivel desde archivo y configurando los jugadores
+     * de acuerdo al modo: PLAYER (1 humano), PvsP (2 humanos), PvsM (1 humano + 1 IA).
+     */
+    public void iniciar(ModoJuego modo, String rutaNivel,
+                        List<Skin> skins, List<ColorJuego> coloresBorde) {
+        if (modo == null)        throw new TheDopoHardestGameException("Modo de juego no especificado");
+        if (skins == null || skins.isEmpty()) {
+            throw new TheDopoHardestGameException("Se requiere al menos una Skin");
+        }
+        this.modo                = modo;
+        this.rutaNivelActual     = rutaNivel;
+        this.skinsConfiguradas   = new ArrayList<>(skins);
+        this.coloresConfigurados = new ArrayList<>(coloresBorde);
+        tiempoTranscurrido       = 0;
+
+        nivelActual = new ConstructorNivel().construirDesdeArchivo(rutaNivel);
+        spawnJugadores();
+
         estado = EstadoJuego.JUGANDO;
     }
 
-    // ── Nivel de demostración hardcoded ──────────────────────────────────────
-    private Nivel construirNivelDemo(ModoJuego modo) {
-        Nivel nivel = new Nivel("demo", 800, 600, 90);
+    private void spawnJugadores() {
         controles.clear();
-
-        ControlHumano ctrl1 = new ControlHumano();
-        controles.add(ctrl1);
-        nivel.agregarJugador(new Jugador(40, 275, 30, 30, ctrl1));
-
-        if (modo == ModoJuego.DOS_JUGADORES) {
-            ControlHumano ctrl2 = new ControlHumano();
-            controles.add(ctrl2);
-            nivel.agregarJugador(new Jugador(40, 325, 30, 30, ctrl2));
+        List<ZonaInicial> inicios = new ArrayList<>();
+        for (Zona z : nivelActual.getZonas()) {
+            if (z instanceof ZonaInicial zi) inicios.add(zi);
+        }
+        if (inicios.isEmpty()) {
+            throw new TheDopoHardestGameException("El nivel no tiene ZonaInicial");
         }
 
-        // Bordes del nivel
-        nivel.agregarPared(new Pared(0,   0,   800, 20));
-        nivel.agregarPared(new Pared(0,   580, 800, 20));
-        nivel.agregarPared(new Pared(0,   0,   20,  600));
-        nivel.agregarPared(new Pared(780, 0,   20,  600));
-        // Paredes internas que crean pasillos
-        nivel.agregarPared(new Pared(200, 20,  20,  380));
-        nivel.agregarPared(new Pared(400, 200, 20,  380));
-        nivel.agregarPared(new Pared(600, 20,  20,  380));
+        int cantidad = switch (modo) {
+            case PLAYER -> 1;
+            case PvsP, PvsM -> 2;
+        };
 
-        // Enemigos con patrullaje vertical
-        nivel.agregarEnemigo(new Enemigo(260, 50,  20, 20, new DeslizadorVertical(30,  545, 4)));
-        nivel.agregarEnemigo(new Enemigo(350, 120, 20, 20, new DeslizadorVertical(30,  545, 3)));
-        nivel.agregarEnemigo(new Enemigo(460, 250, 20, 20, new DeslizadorVertical(215, 565, 5)));
-        nivel.agregarEnemigo(new Enemigo(660, 50,  20, 20, new DeslizadorVertical(30,  545, 4)));
+        for (int i = 0; i < cantidad; i++) {
+            Skin       skin   = skinsConfiguradas.size()   > i ? skinsConfiguradas.get(i)   : new Blinky();
+            ColorJuego color  = coloresConfigurados.size() > i ? coloresConfigurados.get(i) : (i == 0 ? ColorJuego.NEGRO : ColorJuego.BLANCO);
+            // En multijugador usa zonas opuestas (primera y última inicial).
+            ZonaInicial zona  = inicios.get(Math.min(i, inicios.size() - 1));
+            if (modo != ModoJuego.PLAYER && inicios.size() > 1 && i == 1) zona = inicios.get(inicios.size() - 1);
 
-        // Zonas seguras
-        nivel.agregarZona(new ZonaInicial(20,  20, 160, 560));
-        nivel.agregarZona(new ZonaFinal(620, 20, 140, 560));
+            int tam = 18;
+            int spawnX = zona.obtenerPosX() + (zona.obtenerAncho() - tam) / 2;
+            int spawnY = zona.obtenerPosY() + (zona.obtenerAlto()  - tam) / 2;
 
-        return nivel;
+            ControlJugador control;
+            if (modo == ModoJuego.PvsM && i == 1) {
+                control = new MaquinaAleatoria();
+            } else {
+                ControlHumano humano = new ControlHumano();
+                controles.add(humano);
+                control = humano;
+            }
+            Jugador j = new Jugador(spawnX, spawnY, tam, tam, control, skin, color);
+            nivelActual.agregarJugador(j);
+        }
     }
 
-    // ── Ciclo de juego ───────────────────────────────────────────────────────
     public void actualizarJuego(double deltaTime) {
         if (estado != EstadoJuego.JUGANDO) return;
         tiempoTranscurrido += deltaTime;
 
         for (Jugador j : nivelActual.getJugadores()) {
-            j.mover(j.getControl().decidirMovimiento(nivelActual));
+            j.mover(j.getControl().decidirMovimiento(nivelActual), nivelActual);
         }
 
         nivelActual.actualizar(deltaTime);
@@ -80,29 +99,38 @@ public class TheDOPOHardestGame {
         if (tiempoTranscurrido >= nivelActual.obtenerTiempoLimite()) estado = EstadoJuego.DERROTA;
     }
 
-    public void procesarMovimiento(Jugador jugador) {
-        jugador.mover(jugador.getControl().decidirMovimiento(nivelActual));
-    }
-
-    public void pausar()   { if (estado == EstadoJuego.JUGANDO) estado = EstadoJuego.PAUSADO; }
-    public void reanudar() { if (estado == EstadoJuego.PAUSADO) estado = EstadoJuego.JUGANDO; }
+    public void pausar()   { if (estado == EstadoJuego.JUGANDO)  estado = EstadoJuego.PAUSADO;  }
+    public void reanudar() { if (estado == EstadoJuego.PAUSADO)  estado = EstadoJuego.JUGANDO;  }
 
     public void reiniciar() {
-        tiempoTranscurrido = 0;
-        nivelActual.reset();
-        for (Jugador j : nivelActual.getJugadores()) j.morir();
-        estado = EstadoJuego.JUGANDO;
+        if (rutaNivelActual != null) {
+            iniciar(modo, rutaNivelActual, skinsConfiguradas, coloresConfigurados);
+        }
+    }
+
+    /** Carga el siguiente nivel en la rotación; tras el último vuelve al primero. */
+    public void avanzarNivel() {
+        if (rutaNivelActual != null) {
+            iniciar(modo, siguienteRuta(rutaNivelActual), skinsConfiguradas, coloresConfigurados);
+        }
+    }
+
+    private static String siguienteRuta(String ruta) {
+        String base = "resources/configuraciones/";
+        if (ruta.endsWith("nivel1.txt")) return base + "nivel2.txt";
+        if (ruta.endsWith("nivel2.txt")) return base + "nivel3.txt";
+        return base + "nivel1.txt";
     }
 
     public void terminar() { estado = EstadoJuego.MENU; }
 
-    // ── Getters para la capa de presentación ─────────────────────────────────
-    public int    obtenerNivel()          { return 1; }
+    public String obtenerNivelId()       { return nivelActual == null ? "?" : nivelActual.obtenerId(); }
     public double obtenerTiempoRestante() {
         if (nivelActual == null) return 0;
         return Math.max(0, nivelActual.obtenerTiempoLimite() - tiempoTranscurrido);
     }
-    public EstadoJuego         getEstado()      { return estado; }
-    public Nivel               getNivelActual() { return nivelActual; }
-    public List<ControlHumano> getControles()   { return controles; }
+    public ModoJuego           getModo()         { return modo; }
+    public EstadoJuego         getEstado()       { return estado; }
+    public Nivel               getNivelActual()  { return nivelActual; }
+    public List<ControlHumano> getControles()    { return controles; }
 }
