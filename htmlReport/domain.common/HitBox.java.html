@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>HitBox.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in The-DOPO-Hardest-Game Coverage Results</a> &gt; <a href="index.source.html" class="el_package">domain.common</a> &gt; <span class="el_source">HitBox.java</span></div><h1>HitBox.java</h1><pre class="source lang-java linenums">package domain.common;
+
+public class HitBox {
+    private int x, y, ancho, alto;
+
+<span class="fc" id="L6">    public HitBox(int x, int y, int ancho, int alto) {</span>
+<span class="fc" id="L7">        this.x = x; this.y = y; this.ancho = ancho; this.alto = alto;</span>
+<span class="fc" id="L8">    }</span>
+
+    public boolean intersecta(HitBox otra) {
+<span class="pc bpc" id="L11" title="3 of 8 branches missed.">        return x &lt; otra.x + otra.ancho &amp;&amp; x + ancho &gt; otra.x</span>
+            &amp;&amp; y &lt; otra.y + otra.alto  &amp;&amp; y + alto  &gt; otra.y;
+    }
+
+<span class="nc" id="L15">    public int getX()     { return x; }</span>
+<span class="nc" id="L16">    public int getY()     { return y; }</span>
+<span class="nc" id="L17">    public int getAncho() { return ancho; }</span>
+<span class="nc" id="L18">    public int getAlto()  { return alto; }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

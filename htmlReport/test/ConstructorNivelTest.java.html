@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ConstructorNivelTest.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in The-DOPO-Hardest-Game Coverage Results</a> &gt; <a href="index.source.html" class="el_package">test</a> &gt; <span class="el_source">ConstructorNivelTest.java</span></div><h1>ConstructorNivelTest.java</h1><pre class="source lang-java linenums">package test;
+
+import domain.common.ConstructorNivel;
+import domain.common.TheDopoHardestGameException;
+import domain.core.Nivel;
+import domain.world.ZonaFinal;
+import domain.world.ZonaInicial;
+import domain.world.ZonaIntermedia;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+
+<span class="fc" id="L12">class ConstructorNivelTest {</span>
+
+    @Test
+    void cargaNivel1Correctamente() {
+<span class="fc" id="L16">        Nivel n = new ConstructorNivel().construirDesdeArchivo(&quot;resources/configuraciones/nivel1.txt&quot;);</span>
+<span class="fc" id="L17">        assertEquals(&quot;1&quot;, n.obtenerId());</span>
+<span class="fc" id="L18">        assertEquals(800, n.obtenerAncho());</span>
+<span class="fc" id="L19">        assertEquals(558, n.obtenerAlto());</span>
+<span class="fc" id="L20">        assertEquals(90.0, n.obtenerTiempoLimite(), 0.001);</span>
+<span class="fc" id="L21">        assertEquals(4, n.obtenerMonedasTotales());</span>
+<span class="fc" id="L22">        assertEquals(4, n.getEnemigos().size());</span>
+        // Al menos las paredes perimetrales + las internas del archivo
+<span class="pc bpc" id="L24" title="1 of 2 branches missed.">        assertTrue(n.getParedes().size() &gt;= 4);</span>
+        // Inicio y fin
+<span class="fc" id="L26">        boolean tieneInicio = n.getZonas().stream().anyMatch(z -&gt; z instanceof ZonaInicial);</span>
+<span class="fc" id="L27">        boolean tieneFin    = n.getZonas().stream().anyMatch(z -&gt; z instanceof ZonaFinal);</span>
+<span class="fc" id="L28">        assertTrue(tieneInicio);</span>
+<span class="fc" id="L29">        assertTrue(tieneFin);</span>
+<span class="fc" id="L30">    }</span>
+
+    @Test
+    void rutaInexistenteLanzaExcepcionDelDominio() {
+<span class="fc" id="L34">        ConstructorNivel c = new ConstructorNivel();</span>
+<span class="fc" id="L35">        assertThrows(TheDopoHardestGameException.class,</span>
+<span class="nc" id="L36">                () -&gt; c.construirDesdeArchivo(&quot;resources/configuraciones/nivel_inexistente.txt&quot;));</span>
+<span class="fc" id="L37">    }</span>
+
+    @Test
+    void rutaNulaLanzaExcepcionDelDominio() {
+<span class="fc" id="L41">        ConstructorNivel c = new ConstructorNivel();</span>
+<span class="fc" id="L42">        assertThrows(TheDopoHardestGameException.class,</span>
+<span class="nc" id="L43">                () -&gt; c.construirDesdeArchivo(null));</span>
+<span class="fc" id="L44">    }</span>
+
+    @Test
+    void nivel2TieneCheckpointIntermedio() {
+<span class="fc" id="L48">        Nivel n = new ConstructorNivel().construirDesdeArchivo(&quot;resources/configuraciones/nivel2.txt&quot;);</span>
+<span class="fc" id="L49">        boolean tieneCheckpoint = n.getZonas().stream().anyMatch(z -&gt; z instanceof ZonaIntermedia);</span>
+<span class="fc" id="L50">        assertTrue(tieneCheckpoint, &quot;El nivel 2 debe contener una ZonaIntermedia&quot;);</span>
+<span class="fc" id="L51">    }</span>
+
+    @Test
+    void nivel3TieneBombaYFuente() {
+<span class="fc" id="L55">        Nivel n = new ConstructorNivel().construirDesdeArchivo(&quot;resources/configuraciones/nivel3.txt&quot;);</span>
+<span class="fc" id="L56">        assertFalse(n.getBombas().isEmpty(),  &quot;Nivel 3 debe tener bombas&quot;);</span>
+<span class="fc" id="L57">        assertFalse(n.getFuentes().isEmpty(), &quot;Nivel 3 debe tener fuentes de vida&quot;);</span>
+<span class="fc" id="L58">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

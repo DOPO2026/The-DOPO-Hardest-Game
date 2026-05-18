@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Elemento.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in The-DOPO-Hardest-Game Coverage Results</a> &gt; <a href="index.source.html" class="el_package">domain.common</a> &gt; <span class="el_source">Elemento.java</span></div><h1>Elemento.java</h1><pre class="source lang-java linenums">package domain.common;
+
+public abstract class Elemento {
+    protected int posX, posY, ancho, alto;
+    private HitBox hitBox;
+
+<span class="fc" id="L7">    protected Elemento(int posX, int posY, int ancho, int alto) {</span>
+<span class="fc" id="L8">        this.posX = posX; this.posY = posY;</span>
+<span class="fc" id="L9">        this.ancho = ancho; this.alto = alto;</span>
+<span class="fc" id="L10">        actualizarHitBox();</span>
+<span class="fc" id="L11">    }</span>
+
+    // Constructor sin args para subclases stub que no usan hitBox aún
+<span class="nc" id="L14">    protected Elemento() {}</span>
+
+<span class="fc" id="L16">    public HitBox getHitBox()  { return hitBox; }</span>
+<span class="fc" id="L17">    public int obtenerPosX()   { return posX; }</span>
+<span class="fc" id="L18">    public int obtenerPosY()   { return posY; }</span>
+<span class="fc" id="L19">    public int obtenerAncho()  { return ancho; }</span>
+<span class="fc" id="L20">    public int obtenerAlto()   { return alto; }</span>
+<span class="nc" id="L21">    public boolean estaActivo() { return true; }</span>
+
+    protected void actualizarHitBox() {
+<span class="fc" id="L24">        hitBox = new HitBox(posX, posY, ancho, alto);</span>
+<span class="fc" id="L25">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

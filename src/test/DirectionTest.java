@@ -1,6 +1,6 @@
 package test;
 
-import domain.Direction;
+import domain.player.Direction;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 

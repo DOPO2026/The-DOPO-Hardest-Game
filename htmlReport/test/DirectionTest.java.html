@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DirectionTest.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in The-DOPO-Hardest-Game Coverage Results</a> &gt; <a href="index.source.html" class="el_package">test</a> &gt; <span class="el_source">DirectionTest.java</span></div><h1>DirectionTest.java</h1><pre class="source lang-java linenums">package test;
+
+import domain.player.Direction;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+
+<span class="fc" id="L7">class DirectionTest {</span>
+
+    @Test
+    void cardinalesTienenComponenteUnico() {
+<span class="fc" id="L11">        assertArrayEquals(new int[]{ 0, -1}, new int[]{Direction.NORTE.dx, Direction.NORTE.dy});</span>
+<span class="fc" id="L12">        assertArrayEquals(new int[]{ 0,  1}, new int[]{Direction.SUR.dx,   Direction.SUR.dy});</span>
+<span class="fc" id="L13">        assertArrayEquals(new int[]{ 1,  0}, new int[]{Direction.ESTE.dx,  Direction.ESTE.dy});</span>
+<span class="fc" id="L14">        assertArrayEquals(new int[]{-1,  0}, new int[]{Direction.OESTE.dx, Direction.OESTE.dy});</span>
+<span class="fc" id="L15">    }</span>
+
+    @Test
+    void diagonalesCombinanDosEjes() {
+<span class="fc" id="L19">        assertEquals( 1, Direction.NORESTE.dx);</span>
+<span class="fc" id="L20">        assertEquals(-1, Direction.NORESTE.dy);</span>
+<span class="fc" id="L21">        assertEquals(-1, Direction.SUROESTE.dx);</span>
+<span class="fc" id="L22">        assertEquals( 1, Direction.SUROESTE.dy);</span>
+<span class="fc" id="L23">    }</span>
+
+    @Test
+    void quietoEsCero() {
+<span class="fc" id="L27">        assertEquals(0, Direction.QUIETO.dx);</span>
+<span class="fc" id="L28">        assertEquals(0, Direction.QUIETO.dy);</span>
+<span class="fc" id="L29">    }</span>
+
+    @Test
+    void hayNueveValores() {
+<span class="fc" id="L33">        assertEquals(9, Direction.values().length);</span>
+<span class="fc" id="L34">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

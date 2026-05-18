@@ -1,6 +1,11 @@
 package test;
 
-import domain.*;
+import domain.common.ConstructorNivel;
+import domain.common.TheDopoHardestGameException;
+import domain.core.Nivel;
+import domain.world.ZonaFinal;
+import domain.world.ZonaInicial;
+import domain.world.ZonaIntermedia;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 

@@ -1,6 +1,14 @@
 package presentation;
 
-import domain.*;
+import domain.core.EstadoJuego;
+import domain.core.ModoJuego;
+import domain.core.Nivel;
+import domain.core.TheDOPOHardestGame;
+import domain.player.ControlHumano;
+import domain.player.Jugador;
+import domain.skins.ColorJuego;
+import domain.skins.Inky;
+import domain.skins.Skin;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;

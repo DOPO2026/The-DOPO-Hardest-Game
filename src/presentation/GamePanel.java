@@ -1,6 +1,14 @@
 package presentation;
 
-import domain.*;
+import domain.collectibles.Bomba;
+import domain.collectibles.FuenteDeVida;
+import domain.collectibles.Moneda;
+import domain.core.EstadoJuego;
+import domain.core.Nivel;
+import domain.core.TheDOPOHardestGame;
+import domain.enemy.Enemigo;
+import domain.world.Pared;
+import domain.world.Zona;
 import javax.swing.*;
 import java.awt.*;
 

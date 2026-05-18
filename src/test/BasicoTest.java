@@ -1,6 +1,9 @@
 package test;
 
-import domain.*;
+import domain.core.Nivel;
+import domain.enemy.Acelerado;
+import domain.enemy.Basico;
+import domain.enemy.Enemigo;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 

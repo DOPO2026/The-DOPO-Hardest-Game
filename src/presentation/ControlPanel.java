@@ -1,6 +1,6 @@
 package presentation;
 
-import domain.*;
+import domain.core.TheDOPOHardestGame;
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;

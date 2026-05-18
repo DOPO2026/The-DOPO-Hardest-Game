@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TheDOPOHardestGameGUI.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in The-DOPO-Hardest-Game Coverage Results</a> &gt; <a href="index.source.html" class="el_package">presentation</a> &gt; <span class="el_source">TheDOPOHardestGameGUI.java</span></div><h1>TheDOPOHardestGameGUI.java</h1><pre class="source lang-java linenums">package presentation;
+
+import domain.core.EstadoJuego;
+import domain.core.ModoJuego;
+import domain.core.Nivel;
+import domain.core.TheDOPOHardestGame;
+import domain.player.ControlHumano;
+import domain.player.Jugador;
+import domain.skins.ColorJuego;
+import domain.skins.Inky;
+import domain.skins.Skin;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+/**
+ * Punto de entrada y controlador principal de la interfaz gráfica.
+ * Usa CardLayout a nivel de JFrame para alternar entre menú y juego.
+ */
+public class TheDOPOHardestGameGUI implements Runnable, KeyListener {
+    private static final int ESCALA = 1;
+    private static final int ANCHO_VENTANA = 800;
+    private static final int ALTO_VENTANA  = 600;
+    private static final int DELAY_AVANCE_MS = 2200;
+
+    private JFrame frame;
+    private CardLayout layoutRaiz;
+    private JPanel contenedor;
+
+    private MenuManager menu;
+    private JPanel panelJuegoContainer;
+    private GamePanel panelJuego;
+    private ControlPanel panelControl;
+
+    private TheDOPOHardestGame juego;
+    private List&lt;InputManager&gt; inputManagers;
+    private Thread hilo;
+    private volatile boolean corriendo;
+    private volatile boolean avanceProgramado;
+
+<span class="nc" id="L44">    public TheDOPOHardestGameGUI() {</span>
+<span class="nc" id="L45">        juego = new TheDOPOHardestGame();</span>
+<span class="nc" id="L46">        inputManagers = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L47">        configurarVentana();</span>
+<span class="nc" id="L48">    }</span>
+
+    private void configurarVentana() {
+<span class="nc" id="L51">        frame = new JFrame(&quot;The DOPO Hardest Game&quot;);</span>
+<span class="nc" id="L52">        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);</span>
+<span class="nc" id="L53">        frame.setPreferredSize(new Dimension(ANCHO_VENTANA, ALTO_VENTANA));</span>
+
+<span class="nc" id="L55">        layoutRaiz = new CardLayout();</span>
+<span class="nc" id="L56">        contenedor = new JPanel(layoutRaiz);</span>
+
+<span class="nc" id="L58">        menu = new MenuManager(this::iniciarJuegoConfigurado);</span>
+
+<span class="nc" id="L60">        panelJuegoContainer = new JPanel(new BorderLayout());</span>
+<span class="nc" id="L61">        panelJuego   = new GamePanel(juego, ESCALA);</span>
+<span class="nc" id="L62">        panelControl = new ControlPanel(juego);</span>
+<span class="nc" id="L63">        panelJuegoContainer.add(panelJuego,   BorderLayout.CENTER);</span>
+<span class="nc" id="L64">        panelJuegoContainer.add(panelControl, BorderLayout.SOUTH);</span>
+
+<span class="nc" id="L66">        contenedor.add(menu,                &quot;menu&quot;);</span>
+<span class="nc" id="L67">        contenedor.add(panelJuegoContainer, &quot;juego&quot;);</span>
+
+<span class="nc" id="L69">        frame.setContentPane(contenedor);</span>
+<span class="nc" id="L70">        frame.addKeyListener(this);</span>
+<span class="nc" id="L71">        frame.setFocusable(true);</span>
+<span class="nc" id="L72">        frame.pack();</span>
+<span class="nc" id="L73">        frame.setLocationRelativeTo(null);</span>
+<span class="nc" id="L74">        frame.setResizable(false);</span>
+
+<span class="nc" id="L76">        layoutRaiz.show(contenedor, &quot;menu&quot;);</span>
+<span class="nc" id="L77">    }</span>
+
+    // ── Inicio desde menú ────────────────────────────────────────────────────
+    public void mostrarMenuInicial() {
+<span class="nc" id="L81">        menu.mostrarPrincipal();</span>
+<span class="nc" id="L82">        layoutRaiz.show(contenedor, &quot;menu&quot;);</span>
+<span class="nc" id="L83">        frame.setVisible(true);</span>
+<span class="nc" id="L84">        frame.requestFocusInWindow();</span>
+<span class="nc" id="L85">    }</span>
+
+    private void iniciarJuegoConfigurado(SeleccionMenu sel) {
+<span class="nc" id="L88">        List&lt;Skin&gt;       skins   = new ArrayList&lt;&gt;(Arrays.asList(sel.skinJ1));</span>
+<span class="nc" id="L89">        List&lt;ColorJuego&gt; colores = new ArrayList&lt;&gt;(Arrays.asList(sel.colorJ1));</span>
+<span class="nc bnc" id="L90" title="All 2 branches missed.">        if (sel.modo != ModoJuego.PLAYER) {</span>
+<span class="nc bnc" id="L91" title="All 2 branches missed.">            skins.add(sel.skinJ2 != null ? sel.skinJ2 : new Inky());</span>
+<span class="nc" id="L92">            colores.add(sel.colorJ2);</span>
+        }
+<span class="nc" id="L94">        juego.iniciar(sel.modo, sel.rutaNivel, skins, colores);</span>
+<span class="nc" id="L95">        ajustarLienzoYInputs();</span>
+
+<span class="nc" id="L97">        layoutRaiz.show(contenedor, &quot;juego&quot;);</span>
+<span class="nc" id="L98">        frame.requestFocusInWindow();</span>
+<span class="nc" id="L99">        arrancarLoopSiNecesario();</span>
+<span class="nc" id="L100">    }</span>
+
+    /** Ajusta el panel a las dimensiones del nivel y reconecta los InputManagers
+     *  a las nuevas instancias de ControlHumano que crea spawnJugadores(). */
+    private void ajustarLienzoYInputs() {
+<span class="nc" id="L105">        Nivel nivel = juego.getNivelActual();</span>
+<span class="nc" id="L106">        panelJuego.ajustarTamanio(nivel.obtenerAncho(), nivel.obtenerAlto());</span>
+<span class="nc" id="L107">        frame.pack();</span>
+<span class="nc" id="L108">        frame.setLocationRelativeTo(null);</span>
+
+<span class="nc" id="L110">        inputManagers.clear();</span>
+<span class="nc" id="L111">        List&lt;ControlHumano&gt; controles = juego.getControles();</span>
+<span class="nc bnc" id="L112" title="All 2 branches missed.">        if (!controles.isEmpty()) {</span>
+<span class="nc" id="L113">            inputManagers.add(new InputManager(juego, controles.get(0),</span>
+                    KeyEvent.VK_W, KeyEvent.VK_S, KeyEvent.VK_A, KeyEvent.VK_D));
+        }
+<span class="nc bnc" id="L116" title="All 4 branches missed.">        if (juego.getModo() == ModoJuego.PvsP &amp;&amp; controles.size() &gt; 1) {</span>
+<span class="nc" id="L117">            inputManagers.add(new InputManager(juego, controles.get(1),</span>
+                    KeyEvent.VK_UP, KeyEvent.VK_DOWN, KeyEvent.VK_LEFT, KeyEvent.VK_RIGHT));
+        }
+<span class="nc" id="L120">    }</span>
+
+    private void arrancarLoopSiNecesario() {
+<span class="nc bnc" id="L123" title="All 2 branches missed.">        if (corriendo) return;</span>
+<span class="nc" id="L124">        corriendo = true;</span>
+<span class="nc" id="L125">        hilo = new Thread(this, &quot;GameLoop&quot;);</span>
+<span class="nc" id="L126">        hilo.setDaemon(true);</span>
+<span class="nc" id="L127">        hilo.start();</span>
+<span class="nc" id="L128">    }</span>
+
+    // ── Game loop a 60 FPS ───────────────────────────────────────────────────
+    @Override
+    public void run() {
+<span class="nc" id="L133">        final long TARGET_NS = 1_000_000_000L / 60;</span>
+<span class="nc" id="L134">        long lastTime = System.nanoTime();</span>
+
+<span class="nc bnc" id="L136" title="All 2 branches missed.">        while (corriendo) {</span>
+<span class="nc" id="L137">            long now   = System.nanoTime();</span>
+<span class="nc" id="L138">            double delta = (now - lastTime) / 1_000_000_000.0;</span>
+<span class="nc" id="L139">            lastTime   = now;</span>
+
+<span class="nc" id="L141">            juego.actualizarJuego(delta);</span>
+<span class="nc" id="L142">            EstadoJuego estado = juego.getEstado();</span>
+
+<span class="nc" id="L144">            SwingUtilities.invokeLater(() -&gt; {</span>
+<span class="nc" id="L145">                actualizarVista();</span>
+<span class="nc bnc" id="L146" title="All 4 branches missed.">                switch (estado) {</span>
+                    case VICTORIA -&gt; {
+<span class="nc" id="L148">                        mostrarVictoria(juego.obtenerTiempoRestante());</span>
+<span class="nc" id="L149">                        programarAvanceNivel();</span>
+<span class="nc" id="L150">                    }</span>
+<span class="nc" id="L151">                    case DERROTA  -&gt; mostrarDerrota();</span>
+<span class="nc" id="L152">                    case PAUSADO  -&gt; mostrarPausa();</span>
+                    default       -&gt; {}
+                }
+<span class="nc" id="L155">            });</span>
+
+<span class="nc" id="L157">            long sleep = TARGET_NS - (System.nanoTime() - now);</span>
+<span class="nc bnc" id="L158" title="All 2 branches missed.">            if (sleep &gt; 0) {</span>
+<span class="nc" id="L159">                try { Thread.sleep(sleep / 1_000_000, (int)(sleep % 1_000_000)); }</span>
+<span class="nc" id="L160">                catch (InterruptedException ignored) {}</span>
+            }
+<span class="nc" id="L162">        }</span>
+<span class="nc" id="L163">    }</span>
+
+    /** Programa una transición al siguiente nivel tras una breve pausa para
+     *  mostrar el cartel de VICTORIA. Reentrante-seguro vía bandera. */
+    private void programarAvanceNivel() {
+<span class="nc bnc" id="L168" title="All 2 branches missed.">        if (avanceProgramado) return;</span>
+<span class="nc" id="L169">        avanceProgramado = true;</span>
+<span class="nc" id="L170">        Timer t = new Timer(DELAY_AVANCE_MS, ev -&gt; {</span>
+<span class="nc bnc" id="L171" title="All 2 branches missed.">            if (juego.getEstado() != EstadoJuego.VICTORIA) {</span>
+<span class="nc" id="L172">                avanceProgramado = false;</span>
+<span class="nc" id="L173">                return;</span>
+            }
+<span class="nc" id="L175">            juego.avanzarNivel();</span>
+<span class="nc" id="L176">            ajustarLienzoYInputs();</span>
+<span class="nc" id="L177">            frame.requestFocusInWindow();</span>
+<span class="nc" id="L178">            avanceProgramado = false;</span>
+<span class="nc" id="L179">        });</span>
+<span class="nc" id="L180">        t.setRepeats(false);</span>
+<span class="nc" id="L181">        t.start();</span>
+<span class="nc" id="L182">    }</span>
+
+    public void actualizarVista() {
+<span class="nc" id="L185">        panelJuego.actualizarPantalla();</span>
+<span class="nc" id="L186">        Nivel nivel = juego.getNivelActual();</span>
+<span class="nc bnc" id="L187" title="All 2 branches missed.">        if (nivel == null) return;</span>
+<span class="nc" id="L188">        List&lt;Integer&gt; muertes = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L189">        List&lt;Integer&gt; vidas   = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L190" title="All 2 branches missed.">        for (Jugador j : nivel.getJugadores()) {</span>
+<span class="nc" id="L191">            muertes.add(j.obtenerMuertes());</span>
+<span class="nc" id="L192">            vidas.add(j.obtenerVidas());</span>
+<span class="nc" id="L193">        }</span>
+<span class="nc" id="L194">        panelControl.actualizarEstado(juego.obtenerTiempoRestante(), muertes, vidas,</span>
+<span class="nc" id="L195">                nivel.obtenerMonedasTotales() - nivel.obtenerMonedasPendientes(),</span>
+<span class="nc" id="L196">                nivel.obtenerMonedasTotales());</span>
+<span class="nc" id="L197">    }</span>
+
+<span class="nc" id="L199">    public void mostrarPausa()                  { panelControl.mostrarMensaje(&quot;PAUSADO  —  ESC para continuar&quot;); }</span>
+<span class="nc" id="L200">    public void mostrarVictoria(double tiempo)  { panelControl.mostrarMensaje(String.format(&quot;¡VICTORIA!  T: %.0fs  |  cargando siguiente nivel...&quot;, tiempo)); }</span>
+<span class="nc" id="L201">    public void mostrarDerrota()                { panelControl.mostrarMensaje(&quot;¡TIEMPO AGOTADO!  |  R reinicia  |  M menú&quot;); }</span>
+
+<span class="nc" id="L203">    public void reiniciarNivel() { juego.reiniciar(); ajustarLienzoYInputs(); }</span>
+    public void volverAlMenu() {
+<span class="nc" id="L205">        juego.terminar();</span>
+<span class="nc" id="L206">        layoutRaiz.show(contenedor, &quot;menu&quot;);</span>
+<span class="nc" id="L207">        menu.mostrarPrincipal();</span>
+<span class="nc" id="L208">        frame.requestFocusInWindow();</span>
+<span class="nc" id="L209">    }</span>
+
+    // ── Teclado ──────────────────────────────────────────────────────────────
+    @Override
+    public void keyPressed(KeyEvent e) {
+<span class="nc" id="L214">        int code = e.getKeyCode();</span>
+<span class="nc" id="L215">        EstadoJuego estado = juego.getEstado();</span>
+<span class="nc bnc" id="L216" title="All 2 branches missed.">        if (code == KeyEvent.VK_ESCAPE) {</span>
+<span class="nc bnc" id="L217" title="All 2 branches missed.">            if (estado == EstadoJuego.JUGANDO)   juego.pausar();</span>
+<span class="nc bnc" id="L218" title="All 2 branches missed.">            else if (estado == EstadoJuego.PAUSADO) juego.reanudar();</span>
+<span class="nc bnc" id="L219" title="All 6 branches missed.">        } else if (code == KeyEvent.VK_R &amp;&amp; estado != EstadoJuego.JUGANDO &amp;&amp; estado != EstadoJuego.MENU) {</span>
+<span class="nc" id="L220">            reiniciarNivel();</span>
+<span class="nc bnc" id="L221" title="All 4 branches missed.">        } else if (code == KeyEvent.VK_M &amp;&amp; estado != EstadoJuego.MENU) {</span>
+<span class="nc" id="L222">            volverAlMenu();</span>
+        }
+<span class="nc bnc" id="L224" title="All 2 branches missed.">        for (InputManager im : inputManagers) im.procesarTecla(e);</span>
+<span class="nc" id="L225">    }</span>
+
+    @Override
+    public void keyReleased(KeyEvent e) {
+<span class="nc bnc" id="L229" title="All 2 branches missed.">        for (InputManager im : inputManagers) im.procesarTeclaLiberada(e);</span>
+<span class="nc" id="L230">    }</span>
+
+<span class="nc" id="L232">    @Override public void keyTyped(KeyEvent e) {}</span>
+
+    // ── Punto de entrada ─────────────────────────────────────────────────────
+    public static void main(String[] args) {
+<span class="nc" id="L236">        SwingUtilities.invokeLater(() -&gt; new TheDOPOHardestGameGUI().mostrarMenuInicial());</span>
+<span class="nc" id="L237">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

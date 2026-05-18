@@ -1,6 +1,11 @@
 package presentation;
 
-import domain.*;
+import domain.core.ModoJuego;
+import domain.skins.Blinky;
+import domain.skins.Clyde;
+import domain.skins.ColorJuego;
+import domain.skins.Inky;
+import domain.skins.Skin;
 import javax.swing.*;
 import java.awt.*;
 import java.util.function.Consumer;

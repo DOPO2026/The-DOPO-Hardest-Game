@@ -1,8 +1,8 @@
 package presentation;
 
-import domain.ColorJuego;
-import domain.ModoJuego;
-import domain.Skin;
+import domain.core.ModoJuego;
+import domain.skins.ColorJuego;
+import domain.skins.Skin;
 
 public class SeleccionMenu {
     public ModoJuego  modo      = ModoJuego.PLAYER;

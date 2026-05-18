@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EstrategiaMovimientoTest.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in The-DOPO-Hardest-Game Coverage Results</a> &gt; <a href="index.source.html" class="el_package">test</a> &gt; <span class="el_source">EstrategiaMovimientoTest.java</span></div><h1>EstrategiaMovimientoTest.java</h1><pre class="source lang-java linenums">package test;
+
+import domain.core.Nivel;
+import domain.enemy.DeslizadorVertical;
+import domain.enemy.Enemigo;
+import domain.enemy.Patrullero;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+
+<span class="fc" id="L10">class EstrategiaMovimientoTest {</span>
+
+<span class="fc" id="L12">    private Nivel nivel() { return new Nivel(&quot;t&quot;, 800, 600, 60); }</span>
+
+    @Test
+    void deslizadorBajaInicialmente() {
+<span class="fc" id="L16">        DeslizadorVertical d = new DeslizadorVertical(100, 300, 5);</span>
+<span class="fc" id="L17">        Enemigo e = new Enemigo(200, 150, 20, 20, d);</span>
+<span class="fc" id="L18">        int yInicial = e.obtenerPosY();</span>
+<span class="fc" id="L19">        d.actualizar(e, nivel(), 0.016);</span>
+<span class="pc bpc" id="L20" title="1 of 2 branches missed.">        assertTrue(e.obtenerPosY() &gt; yInicial);</span>
+<span class="fc" id="L21">    }</span>
+
+    @Test
+    void deslizadorRebotaAlLlegarAlMaximo() {
+        // Con minY=100, maxY=110, velocidad=5: tras la primera actualización posY=155 &gt;= 110 → bajando=false
+<span class="fc" id="L26">        DeslizadorVertical d = new DeslizadorVertical(100, 110, 5);</span>
+<span class="fc" id="L27">        Enemigo e = new Enemigo(200, 105, 20, 20, d);</span>
+<span class="fc" id="L28">        Nivel n = nivel();</span>
+<span class="fc" id="L29">        d.actualizar(e, n, 0.016); // posY=110 → bajando=false</span>
+<span class="fc" id="L30">        int yTrasRebote = e.obtenerPosY();</span>
+<span class="fc" id="L31">        d.actualizar(e, n, 0.016); // ahora sube</span>
+<span class="pc bpc" id="L32" title="1 of 2 branches missed.">        assertTrue(e.obtenerPosY() &lt; yTrasRebote);</span>
+<span class="fc" id="L33">    }</span>
+
+    @Test
+    void deslizadorRebotaAlLlegarAlMinimo() {
+<span class="fc" id="L37">        DeslizadorVertical d = new DeslizadorVertical(100, 110, 5);</span>
+<span class="fc" id="L38">        Enemigo e = new Enemigo(200, 105, 20, 20, d);</span>
+<span class="fc" id="L39">        Nivel n = nivel();</span>
+        // Varias iteraciones cubren la rama bajando=true tras llegar a minY
+<span class="fc bfc" id="L41" title="All 2 branches covered.">        for (int i = 0; i &lt; 20; i++) d.actualizar(e, n, 0.016);</span>
+<span class="fc" id="L42">        assertNotNull(e); // sin excepción y enemigo sigue existiendo</span>
+<span class="fc" id="L43">    }</span>
+
+    @Test
+    void patrulleroActualizarEsNoOp() {
+<span class="fc" id="L47">        Enemigo e = new Enemigo(100, 100, 20, 20, new Patrullero());</span>
+<span class="fc" id="L48">        assertDoesNotThrow(() -&gt; new Patrullero().actualizar(e, nivel(), 0.016));</span>
+<span class="fc" id="L49">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JugadorTest.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in The-DOPO-Hardest-Game Coverage Results</a> &gt; <a href="index.source.html" class="el_package">test</a> &gt; <span class="el_source">JugadorTest.java</span></div><h1>JugadorTest.java</h1><pre class="source lang-java linenums">package test;
+
+import domain.common.TheDopoHardestGameException;
+import domain.core.Nivel;
+import domain.player.ControlHumano;
+import domain.player.Direction;
+import domain.player.Jugador;
+import domain.skins.Blinky;
+import domain.skins.Clyde;
+import domain.skins.ColorJuego;
+import domain.skins.Skin;
+import domain.world.Pared;
+import domain.world.ZonaIntermedia;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+
+<span class="fc" id="L17">class JugadorTest {</span>
+
+    private Jugador crearJugador(Skin skin) {
+<span class="fc" id="L20">        return new Jugador(100, 100, 20, 20, new ControlHumano(), skin, ColorJuego.NEGRO);</span>
+    }
+
+    @Test
+    void aplicarSkinActualizaVidasYVelocidad() {
+<span class="fc" id="L25">        Jugador j = crearJugador(new Blinky());</span>
+<span class="fc" id="L26">        assertEquals(1, j.obtenerVidas());</span>
+
+<span class="fc" id="L28">        j.aplicarSkin(new Clyde());</span>
+<span class="fc" id="L29">        assertEquals(2, j.obtenerVidas());</span>
+<span class="fc" id="L30">    }</span>
+
+    @Test
+    void moverNorteDecrementaY() {
+<span class="fc" id="L34">        Jugador j = crearJugador(new Blinky());</span>
+<span class="fc" id="L35">        Nivel nivel = new Nivel(&quot;t&quot;, 800, 600, 60);</span>
+<span class="fc" id="L36">        int yInicial = j.obtenerPosY();</span>
+<span class="fc" id="L37">        j.mover(Direction.NORTE, nivel);</span>
+<span class="pc bpc" id="L38" title="1 of 2 branches missed.">        assertTrue(j.obtenerPosY() &lt; yInicial);</span>
+<span class="fc" id="L39">    }</span>
+
+    @Test
+    void paredBloqueaMovimiento() {
+<span class="fc" id="L43">        Jugador j = crearJugador(new Blinky());</span>
+<span class="fc" id="L44">        Nivel nivel = new Nivel(&quot;t&quot;, 800, 600, 60);</span>
+        // Pared pegada arriba del jugador (su hitbox empieza en y=100); cualquier
+        // intento de avanzar al norte debe entrar en colisión.
+<span class="fc" id="L47">        nivel.agregarPared(new Pared(90, 90, 40, 15));</span>
+
+<span class="fc" id="L49">        int yInicial = j.obtenerPosY();</span>
+<span class="fc" id="L50">        j.mover(Direction.NORTE, nivel);</span>
+<span class="fc" id="L51">        assertEquals(yInicial, j.obtenerPosY(), &quot;El jugador no debe atravesar la pared&quot;);</span>
+<span class="fc" id="L52">    }</span>
+
+    @Test
+    void morirIncrementaMuertesYReubica() {
+<span class="fc" id="L56">        Jugador j = crearJugador(new Blinky());</span>
+<span class="fc" id="L57">        Nivel nivel = new Nivel(&quot;t&quot;, 800, 600, 60);</span>
+<span class="fc" id="L58">        j.mover(Direction.ESTE, nivel);</span>
+<span class="fc" id="L59">        int xMovido = j.obtenerPosX();</span>
+<span class="fc" id="L60">        assertNotEquals(100, xMovido);</span>
+
+<span class="fc" id="L62">        j.morir();</span>
+<span class="fc" id="L63">        assertEquals(1, j.obtenerMuertes());</span>
+<span class="fc" id="L64">        assertEquals(100, j.obtenerPosX());</span>
+<span class="fc" id="L65">    }</span>
+
+    @Test
+    void recibirGolpeConEscudoNoCuentaMuerte() {
+<span class="fc" id="L69">        Jugador j = crearJugador(new Clyde()); // 2 vidas</span>
+<span class="fc" id="L70">        boolean murio = j.recibirGolpe();</span>
+<span class="fc" id="L71">        assertFalse(murio);</span>
+<span class="fc" id="L72">        assertEquals(0, j.obtenerMuertes());</span>
+<span class="fc" id="L73">        assertEquals(1, j.obtenerVidas());</span>
+<span class="fc" id="L74">    }</span>
+
+    @Test
+    void recibirGolpeSinEscudoCuentaMuerte() {
+<span class="fc" id="L78">        Jugador j = crearJugador(new Blinky()); // 1 vida</span>
+<span class="fc" id="L79">        boolean murio = j.recibirGolpe();</span>
+<span class="fc" id="L80">        assertTrue(murio);</span>
+<span class="fc" id="L81">        assertEquals(1, j.obtenerMuertes());</span>
+<span class="fc" id="L82">    }</span>
+
+    @Test
+    void setRespawnActualizaPuntoDeReaparicion() {
+<span class="fc" id="L86">        Jugador j = crearJugador(new Blinky());</span>
+        // Zona en (200,200,100,100): respawnX = 200+(100-20)/2=240, respawnY=240
+<span class="fc" id="L88">        j.setRespawn(new ZonaIntermedia(200, 200, 100, 100));</span>
+<span class="fc" id="L89">        j.morir();</span>
+<span class="fc" id="L90">        assertEquals(240, j.obtenerPosX());</span>
+<span class="fc" id="L91">        assertEquals(240, j.obtenerPosY());</span>
+<span class="fc" id="L92">    }</span>
+
+    @Test
+    void agregarEscudoIncrementaVidas() {
+<span class="fc" id="L96">        Jugador j = crearJugador(new Blinky()); // 1 vida</span>
+<span class="fc" id="L97">        j.agregarEscudo();</span>
+<span class="fc" id="L98">        assertEquals(2, j.obtenerVidas());</span>
+<span class="fc" id="L99">    }</span>
+
+    @Test
+    void aplicarSkinNullLanzaExcepcion() {
+<span class="fc" id="L103">        Jugador j = crearJugador(new Blinky());</span>
+<span class="pc" id="L104">        assertThrows(TheDopoHardestGameException.class, () -&gt; j.aplicarSkin(null));</span>
+<span class="fc" id="L105">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

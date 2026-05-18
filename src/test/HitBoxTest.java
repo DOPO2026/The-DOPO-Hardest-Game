@@ -1,6 +1,6 @@
 package test;
 
-import domain.HitBox;
+import domain.common.HitBox;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 

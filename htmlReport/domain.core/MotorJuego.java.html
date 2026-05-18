@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MotorJuego.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in The-DOPO-Hardest-Game Coverage Results</a> &gt; <a href="index.source.html" class="el_package">domain.core</a> &gt; <span class="el_source">MotorJuego.java</span></div><h1>MotorJuego.java</h1><pre class="source lang-java linenums">package domain.core;
+
+import domain.collectibles.Bomba;
+import domain.collectibles.FuenteDeVida;
+import domain.collectibles.Moneda;
+import domain.collectibles.MonedaSkin;
+import domain.enemy.Enemigo;
+import domain.player.Jugador;
+import domain.world.Zona;
+import domain.world.ZonaFinal;
+import domain.world.ZonaIntermedia;
+
+import java.util.List;
+
+<span class="fc" id="L15">public class MotorJuego {</span>
+
+    public void procesarInteracciones(Nivel nivel) {
+<span class="fc" id="L18">        List&lt;Jugador&gt; jugadores = nivel.getJugadores();</span>
+
+<span class="fc bfc" id="L20" title="All 2 branches covered.">        for (Jugador j : jugadores) {</span>
+            // Enemigo
+<span class="fc bfc" id="L22" title="All 2 branches covered.">            for (Enemigo e : nivel.getEnemigos()) {</span>
+<span class="pc bpc" id="L23" title="1 of 4 branches missed.">                if (e.estaActivo() &amp;&amp; j.getHitBox().intersecta(e.getHitBox())) {</span>
+<span class="pc bpc" id="L24" title="1 of 2 branches missed.">                    if (j.recibirGolpe()) nivel.reiniciarMonedas();</span>
+                    break;
+                }
+<span class="fc" id="L27">            }</span>
+
+            // Moneda
+<span class="fc bfc" id="L30" title="All 2 branches covered.">            for (Moneda m : nivel.getMonedas()) {</span>
+<span class="pc bpc" id="L31" title="1 of 4 branches missed.">                if (!m.estaRecolectada() &amp;&amp; j.getHitBox().intersecta(m.getHitBox())) {</span>
+<span class="fc" id="L32">                    m.recolectar();</span>
+<span class="fc" id="L33">                    nivel.registrarRecoleccion();</span>
+<span class="fc bfc" id="L34" title="All 2 branches covered.">                    if (m instanceof MonedaSkin ms) {</span>
+<span class="fc" id="L35">                        j.aplicarSkin(ms.obtenerSkinOtorgada());</span>
+                    } else {
+<span class="fc" id="L37">                        j.restaurarSkin();</span>
+                    }
+                }
+<span class="fc" id="L40">            }</span>
+
+            // Fuente de vida
+<span class="fc bfc" id="L43" title="All 2 branches covered.">            for (FuenteDeVida f : nivel.getFuentes()) {</span>
+<span class="pc bpc" id="L44" title="2 of 4 branches missed.">                if (f.estaActivo() &amp;&amp; j.getHitBox().intersecta(f.getHitBox())) {</span>
+<span class="fc" id="L45">                    f.activar(j);</span>
+                }
+<span class="fc" id="L47">            }</span>
+
+            // Bomba
+<span class="fc bfc" id="L50" title="All 2 branches covered.">            for (Bomba b : nivel.getBombas()) {</span>
+<span class="pc bpc" id="L51" title="2 of 4 branches missed.">                if (b.estaActivo() &amp;&amp; j.getHitBox().intersecta(b.getHitBox())) {</span>
+<span class="fc" id="L52">                    b.explotar(j);</span>
+<span class="fc" id="L53">                    j.morir();</span>
+<span class="fc" id="L54">                    nivel.reiniciarMonedas();</span>
+                }
+<span class="fc" id="L56">            }</span>
+
+            // Checkpoint
+<span class="fc bfc" id="L59" title="All 2 branches covered.">            for (Zona z : nivel.getZonas()) {</span>
+<span class="fc bfc" id="L60" title="All 2 branches covered.">                if (z instanceof ZonaIntermedia zi</span>
+<span class="pc bpc" id="L61" title="1 of 2 branches missed.">                        &amp;&amp; z.contiene(j.obtenerPosX(), j.obtenerPosY())) {</span>
+<span class="fc" id="L62">                    zi.activarCheckpoint(j);</span>
+                }
+<span class="fc" id="L64">            }</span>
+<span class="fc" id="L65">        }</span>
+
+        // Colisión jugador↔jugador (PvsP / PvsM): cuenta muerte para ambos.
+<span class="fc bfc" id="L68" title="All 2 branches covered.">        for (int i = 0; i &lt; jugadores.size(); i++) {</span>
+<span class="fc bfc" id="L69" title="All 2 branches covered.">            for (int k = i + 1; k &lt; jugadores.size(); k++) {</span>
+<span class="fc" id="L70">                Jugador a = jugadores.get(i);</span>
+<span class="fc" id="L71">                Jugador b = jugadores.get(k);</span>
+<span class="pc bpc" id="L72" title="1 of 2 branches missed.">                if (a.getHitBox().intersecta(b.getHitBox())) {</span>
+<span class="fc" id="L73">                    a.morir();</span>
+<span class="fc" id="L74">                    b.morir();</span>
+<span class="fc" id="L75">                    nivel.reiniciarMonedas();</span>
+                }
+            }
+        }
+<span class="fc" id="L79">    }</span>
+
+    /** Retorna true si algún jugador alcanzó la ZonaFinal con todas las monedas recolectadas. */
+    public boolean evaluarEstado(Nivel nivel) {
+<span class="fc bfc" id="L83" title="All 2 branches covered.">        if (!nivel.estaCompleto()) return false;</span>
+<span class="pc bpc" id="L84" title="1 of 2 branches missed.">        for (Zona z : nivel.getZonas()) {</span>
+<span class="pc bpc" id="L85" title="1 of 2 branches missed.">            if (z instanceof ZonaFinal) {</span>
+<span class="pc bpc" id="L86" title="1 of 2 branches missed.">                for (Jugador j : nivel.getJugadores()) {</span>
+<span class="pc bpc" id="L87" title="1 of 2 branches missed.">                    if (z.contiene(j.obtenerPosX(), j.obtenerPosY())) return true;</span>
+<span class="nc" id="L88">                }</span>
+            }
+<span class="nc" id="L90">        }</span>
+<span class="nc" id="L91">        return false;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

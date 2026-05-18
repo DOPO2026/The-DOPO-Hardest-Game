@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Basico.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in The-DOPO-Hardest-Game Coverage Results</a> &gt; <a href="index.source.html" class="el_package">domain.enemy</a> &gt; <span class="el_source">Basico.java</span></div><h1>Basico.java</h1><pre class="source lang-java linenums">package domain.enemy;
+
+import domain.core.Nivel;
+
+public class Basico implements EstrategiaMovimiento {
+    protected int dx, dy;
+    protected final int limIzq, limDer, limSup, limInf;
+    protected final int velocidad;
+
+    public Basico(int dx, int dy, int limIzq, int limDer, int limSup, int limInf) {
+<span class="fc" id="L11">        this(dx, dy, limIzq, limDer, limSup, limInf, 2);</span>
+<span class="fc" id="L12">    }</span>
+
+<span class="fc" id="L14">    protected Basico(int dx, int dy, int limIzq, int limDer, int limSup, int limInf, int velocidad) {</span>
+<span class="fc" id="L15">        this.dx = dx;</span>
+<span class="fc" id="L16">        this.dy = dy;</span>
+<span class="fc" id="L17">        this.limIzq = limIzq;</span>
+<span class="fc" id="L18">        this.limDer = limDer;</span>
+<span class="fc" id="L19">        this.limSup = limSup;</span>
+<span class="fc" id="L20">        this.limInf = limInf;</span>
+<span class="fc" id="L21">        this.velocidad = velocidad;</span>
+<span class="fc" id="L22">    }</span>
+
+    @Override
+    public void actualizar(Enemigo enemigo, Nivel nivel, double deltaTime) {
+<span class="fc" id="L26">        enemigo.mover(dx * velocidad, dy * velocidad);</span>
+
+<span class="fc" id="L28">        int x = enemigo.obtenerPosX();</span>
+<span class="fc" id="L29">        int y = enemigo.obtenerPosY();</span>
+<span class="fc" id="L30">        int w = enemigo.obtenerAncho();</span>
+<span class="fc" id="L31">        int h = enemigo.obtenerAlto();</span>
+
+<span class="fc bfc" id="L33" title="All 2 branches covered.">        if (x + w &gt;= limDer) dx = -Math.abs(dx);</span>
+<span class="pc bpc" id="L34" title="1 of 2 branches missed.">        if (x       &lt;= limIzq) dx =  Math.abs(dx);</span>
+<span class="pc bpc" id="L35" title="1 of 2 branches missed.">        if (y + h &gt;= limInf) dy = -Math.abs(dy);</span>
+<span class="pc bpc" id="L36" title="1 of 2 branches missed.">        if (y       &lt;= limSup) dy =  Math.abs(dy);</span>
+<span class="fc" id="L37">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

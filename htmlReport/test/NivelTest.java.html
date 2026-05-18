@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>NivelTest.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in The-DOPO-Hardest-Game Coverage Results</a> &gt; <a href="index.source.html" class="el_package">test</a> &gt; <span class="el_source">NivelTest.java</span></div><h1>NivelTest.java</h1><pre class="source lang-java linenums">package test;
+
+import domain.collectibles.Moneda;
+import domain.collectibles.MonedaAmarilla;
+import domain.core.Nivel;
+import domain.enemy.Basico;
+import domain.enemy.Enemigo;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+
+<span class="fc" id="L11">class NivelTest {</span>
+
+    @Test
+    void registrarRecoleccionDecrementaPendientes() {
+<span class="fc" id="L15">        Nivel n = new Nivel(&quot;t&quot;, 800, 600, 60);</span>
+<span class="fc" id="L16">        n.agregarMoneda(new MonedaAmarilla(0, 0, 14, 14));</span>
+<span class="fc" id="L17">        n.agregarMoneda(new MonedaAmarilla(20, 20, 14, 14));</span>
+<span class="fc" id="L18">        assertEquals(2, n.obtenerMonedasPendientes());</span>
+
+<span class="fc" id="L20">        n.registrarRecoleccion();</span>
+<span class="fc" id="L21">        assertEquals(1, n.obtenerMonedasPendientes());</span>
+<span class="fc" id="L22">    }</span>
+
+    @Test
+    void estaCompletoCuandoNoQuedanMonedas() {
+<span class="fc" id="L26">        Nivel n = new Nivel(&quot;t&quot;, 800, 600, 60);</span>
+<span class="fc" id="L27">        assertTrue(n.estaCompleto());</span>
+<span class="fc" id="L28">        n.agregarMoneda(new MonedaAmarilla(0, 0, 14, 14));</span>
+<span class="fc" id="L29">        assertFalse(n.estaCompleto());</span>
+<span class="fc" id="L30">        n.registrarRecoleccion();</span>
+<span class="fc" id="L31">        assertTrue(n.estaCompleto());</span>
+<span class="fc" id="L32">    }</span>
+
+    @Test
+    void actualizarMueveLosEnemigos() {
+<span class="fc" id="L36">        Nivel n = new Nivel(&quot;t&quot;, 800, 600, 60);</span>
+<span class="fc" id="L37">        Enemigo e = new Enemigo(100, 100, 20, 20, new Basico(1, 0, 0, 800, 0, 600));</span>
+<span class="fc" id="L38">        n.agregarEnemigo(e);</span>
+<span class="fc" id="L39">        int xInicial = e.obtenerPosX();</span>
+<span class="fc" id="L40">        n.actualizar(0.016);</span>
+<span class="fc" id="L41">        assertNotEquals(xInicial, e.obtenerPosX());</span>
+<span class="fc" id="L42">    }</span>
+
+    @Test
+    void resetReiniciaMonedas() {
+<span class="fc" id="L46">        Nivel n = new Nivel(&quot;t&quot;, 800, 600, 60);</span>
+<span class="fc" id="L47">        n.agregarMoneda(new MonedaAmarilla(0, 0, 14, 14));</span>
+<span class="fc" id="L48">        n.registrarRecoleccion();</span>
+<span class="fc" id="L49">        assertEquals(0, n.obtenerMonedasPendientes());</span>
+<span class="fc" id="L50">        n.reset();</span>
+<span class="fc" id="L51">        assertEquals(1, n.obtenerMonedasPendientes());</span>
+<span class="fc" id="L52">    }</span>
+
+    @Test
+    void reiniciarMonedasRestauraEstado() {
+<span class="fc" id="L56">        Nivel n = new Nivel(&quot;t&quot;, 800, 600, 60);</span>
+<span class="fc" id="L57">        Moneda m = new MonedaAmarilla(0, 0, 14, 14);</span>
+<span class="fc" id="L58">        n.agregarMoneda(m);</span>
+<span class="fc" id="L59">        m.recolectar();</span>
+<span class="fc" id="L60">        n.registrarRecoleccion();</span>
+<span class="fc" id="L61">        assertTrue(m.estaRecolectada());</span>
+<span class="fc" id="L62">        assertEquals(0, n.obtenerMonedasPendientes());</span>
+
+<span class="fc" id="L64">        n.reiniciarMonedas();</span>
+<span class="fc" id="L65">        assertFalse(m.estaRecolectada());</span>
+<span class="fc" id="L66">        assertEquals(1, n.obtenerMonedasPendientes());</span>
+<span class="fc" id="L67">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

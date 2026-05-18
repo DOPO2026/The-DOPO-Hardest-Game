@@ -1,6 +1,10 @@
 package test;
 
-import domain.*;
+import domain.collectibles.Moneda;
+import domain.collectibles.MonedaAmarilla;
+import domain.core.Nivel;
+import domain.enemy.Basico;
+import domain.enemy.Enemigo;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -25,6 +29,26 @@ class NivelTest {
         assertFalse(n.estaCompleto());
         n.registrarRecoleccion();
         assertTrue(n.estaCompleto());
+    }
+
+    @Test
+    void actualizarMueveLosEnemigos() {
+        Nivel n = new Nivel("t", 800, 600, 60);
+        Enemigo e = new Enemigo(100, 100, 20, 20, new Basico(1, 0, 0, 800, 0, 600));
+        n.agregarEnemigo(e);
+        int xInicial = e.obtenerPosX();
+        n.actualizar(0.016);
+        assertNotEquals(xInicial, e.obtenerPosX());
+    }
+
+    @Test
+    void resetReiniciaMonedas() {
+        Nivel n = new Nivel("t", 800, 600, 60);
+        n.agregarMoneda(new MonedaAmarilla(0, 0, 14, 14));
+        n.registrarRecoleccion();
+        assertEquals(0, n.obtenerMonedasPendientes());
+        n.reset();
+        assertEquals(1, n.obtenerMonedasPendientes());
     }
 
     @Test

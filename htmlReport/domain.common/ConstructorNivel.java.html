@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ConstructorNivel.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in The-DOPO-Hardest-Game Coverage Results</a> &gt; <a href="index.source.html" class="el_package">domain.common</a> &gt; <span class="el_source">ConstructorNivel.java</span></div><h1>ConstructorNivel.java</h1><pre class="source lang-java linenums">package domain.common;
+
+import domain.collectibles.Bomba;
+import domain.collectibles.FuenteDeVida;
+import domain.collectibles.MonedaAmarilla;
+import domain.collectibles.MonedaSkin;
+import domain.core.Nivel;
+import domain.enemy.Acelerado;
+import domain.enemy.Basico;
+import domain.enemy.DeslizadorVertical;
+import domain.enemy.Enemigo;
+import domain.enemy.EstrategiaMovimiento;
+import domain.skins.Blinky;
+import domain.skins.Clyde;
+import domain.skins.Inky;
+import domain.skins.Skin;
+import domain.world.Pared;
+import domain.world.ZonaFinal;
+import domain.world.ZonaInicial;
+import domain.world.ZonaIntermedia;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+
+<span class="fc" id="L26">public class ConstructorNivel {</span>
+
+    private static final int TAM_MONEDA   = 14;
+    private static final int TAM_ENEMIGO  = 20;
+    private static final int TAM_ESPECIAL = 20;
+    private static final int GROSOR_PARED = 10;
+
+    private Nivel nivel;
+
+    /**
+     * Construye un nivel a partir de un archivo de configuración.
+     * @throws TheDopoHardestGameException si la ruta es nula/vacía, el archivo no
+     *         existe o no puede leerse, o si una línea tiene formato inválido.
+     */
+    public Nivel construirDesdeArchivo(String rutaArchivo) {
+<span class="pc bpc" id="L41" title="1 of 4 branches missed.">        if (rutaArchivo == null || rutaArchivo.isBlank()) {</span>
+<span class="fc" id="L42">            throw new TheDopoHardestGameException(&quot;Ruta de nivel vacía o nula&quot;);</span>
+        }
+<span class="fc" id="L44">        try (BufferedReader br = new BufferedReader(new FileReader(rutaArchivo))) {</span>
+            String linea;
+<span class="fc" id="L46">            String id      = &quot;?&quot;;</span>
+<span class="fc" id="L47">            int    ancho   = 800;</span>
+<span class="fc" id="L48">            int    alto    = 600;</span>
+<span class="fc" id="L49">            double tiempo  = 60;</span>
+
+            // Primera pasada: metadata
+<span class="fc bfc" id="L52" title="All 2 branches covered.">            while ((linea = br.readLine()) != null) {</span>
+<span class="fc" id="L53">                linea = linea.trim();</span>
+<span class="fc bfc" id="L54" title="All 4 branches covered.">                if (linea.isEmpty() || linea.startsWith(&quot;#&quot;)) continue;</span>
+<span class="fc" id="L55">                String[] t = linea.split(&quot;;&quot;);</span>
+                try {
+<span class="fc bfc" id="L57" title="All 4 branches covered.">                    switch (t[0]) {</span>
+<span class="fc" id="L58">                        case &quot;NIVEL&quot;   -&gt; id     = t[1];</span>
+<span class="fc" id="L59">                        case &quot;TIEMPO&quot;  -&gt; tiempo = Double.parseDouble(t[1]);</span>
+<span class="fc" id="L60">                        case &quot;TABLERO&quot; -&gt; { ancho = Integer.parseInt(t[1]); alto = Integer.parseInt(t[2]); }</span>
+                        default        -&gt; {}
+                    }
+<span class="nc" id="L63">                } catch (NumberFormatException | ArrayIndexOutOfBoundsException ex) {</span>
+<span class="nc" id="L64">                    throw new TheDopoHardestGameException(&quot;Línea inválida en metadata: &quot; + linea);</span>
+<span class="fc" id="L65">                }</span>
+<span class="fc" id="L66">            }</span>
+<span class="fc" id="L67">            nivel = new Nivel(id, ancho, alto, tiempo);</span>
+<span class="fc" id="L68">            agregarParedesPerimetrales(nivel, ancho, alto);</span>
+
+            // Segunda pasada: contenido
+<span class="fc" id="L71">            try (BufferedReader br2 = new BufferedReader(new FileReader(rutaArchivo))) {</span>
+<span class="fc bfc" id="L72" title="All 2 branches covered.">                while ((linea = br2.readLine()) != null) {</span>
+<span class="fc" id="L73">                    linea = linea.trim();</span>
+<span class="fc bfc" id="L74" title="All 4 branches covered.">                    if (linea.isEmpty() || linea.startsWith(&quot;#&quot;)) continue;</span>
+<span class="fc" id="L75">                    String[] t = linea.split(&quot;;&quot;);</span>
+                    try {
+<span class="fc bfc" id="L77" title="All 6 branches covered.">                        switch (t[0]) {</span>
+<span class="fc" id="L78">                            case &quot;ZONA&quot;     -&gt; construirZona(t);</span>
+<span class="fc" id="L79">                            case &quot;ENEMIGO&quot;  -&gt; construirEnemigo(t);</span>
+<span class="fc" id="L80">                            case &quot;MONEDA&quot;   -&gt; construirMoneda(t);</span>
+<span class="fc" id="L81">                            case &quot;ELEMENTO&quot; -&gt; construirElemento(t);</span>
+<span class="fc" id="L82">                            case &quot;PARED&quot;    -&gt; construirPared(t);</span>
+                            default         -&gt; {}
+                        }
+<span class="nc" id="L85">                    } catch (NumberFormatException | ArrayIndexOutOfBoundsException ex) {</span>
+<span class="nc" id="L86">                        throw new TheDopoHardestGameException(&quot;Línea con formato inválido: &quot; + linea);</span>
+<span class="fc" id="L87">                    }</span>
+<span class="fc" id="L88">                }</span>
+            }
+<span class="fc" id="L90">            return nivel;</span>
+<span class="fc" id="L91">        } catch (IOException ex) {</span>
+<span class="fc" id="L92">            throw new TheDopoHardestGameException(&quot;No se pudo cargar el nivel: &quot; + rutaArchivo);</span>
+        }
+    }
+
+    private void agregarParedesPerimetrales(Nivel n, int ancho, int alto) {
+<span class="fc" id="L97">        int g = GROSOR_PARED;</span>
+<span class="fc" id="L98">        n.agregarPared(new Pared(0,         0,        ancho, g));</span>
+<span class="fc" id="L99">        n.agregarPared(new Pared(0,         alto - g, ancho, g));</span>
+<span class="fc" id="L100">        n.agregarPared(new Pared(0,         0,        g,     alto));</span>
+<span class="fc" id="L101">        n.agregarPared(new Pared(ancho - g, 0,        g,     alto));</span>
+<span class="fc" id="L102">    }</span>
+
+    private void construirZona(String[] t) {
+<span class="fc" id="L105">        String tipo = t[1];</span>
+<span class="fc" id="L106">        int x = Integer.parseInt(t[2]);</span>
+<span class="fc" id="L107">        int y = Integer.parseInt(t[3]);</span>
+<span class="fc" id="L108">        int w = Integer.parseInt(t[4]);</span>
+<span class="fc" id="L109">        int h = Integer.parseInt(t[5]);</span>
+<span class="pc bpc" id="L110" title="1 of 4 branches missed.">        switch (tipo) {</span>
+<span class="fc" id="L111">            case &quot;INICIO&quot;     -&gt; nivel.agregarZona(new ZonaInicial(x, y, w, h));</span>
+<span class="fc" id="L112">            case &quot;FIN&quot;        -&gt; nivel.agregarZona(new ZonaFinal(x, y, w, h));</span>
+<span class="fc" id="L113">            case &quot;INTERMEDIA&quot; -&gt; nivel.agregarZona(new ZonaIntermedia(x, y, w, h));</span>
+<span class="nc" id="L114">            default           -&gt; throw new TheDopoHardestGameException(&quot;Tipo de zona desconocido: &quot; + tipo);</span>
+        }
+<span class="fc" id="L116">    }</span>
+
+    private void construirEnemigo(String[] t) {
+<span class="fc" id="L119">        String tipo = t[1];</span>
+<span class="fc" id="L120">        int x = Integer.parseInt(t[2]);</span>
+<span class="fc" id="L121">        int y = Integer.parseInt(t[3]);</span>
+<span class="pc bpc" id="L122" title="2 of 4 branches missed.">        EstrategiaMovimiento estrategia = switch (tipo) {</span>
+<span class="fc" id="L123">            case &quot;BASICO&quot;      -&gt; new Basico(</span>
+<span class="fc" id="L124">                    Integer.parseInt(t[4]), Integer.parseInt(t[5]),</span>
+<span class="fc" id="L125">                    Integer.parseInt(t[6]), Integer.parseInt(t[7]),</span>
+<span class="fc" id="L126">                    Integer.parseInt(t[8]), Integer.parseInt(t[9]));</span>
+<span class="fc" id="L127">            case &quot;ACELERADO&quot;   -&gt; new Acelerado(</span>
+<span class="fc" id="L128">                    Integer.parseInt(t[4]), Integer.parseInt(t[5]),</span>
+<span class="fc" id="L129">                    Integer.parseInt(t[6]), Integer.parseInt(t[7]),</span>
+<span class="fc" id="L130">                    Integer.parseInt(t[8]), Integer.parseInt(t[9]));</span>
+<span class="nc" id="L131">            case &quot;DESLIZADORV&quot; -&gt; new DeslizadorVertical(</span>
+<span class="nc" id="L132">                    Integer.parseInt(t[4]), Integer.parseInt(t[5]), 3);</span>
+<span class="nc" id="L133">            default            -&gt; throw new TheDopoHardestGameException(&quot;Tipo de enemigo desconocido: &quot; + tipo);</span>
+        };
+<span class="fc" id="L135">        nivel.agregarEnemigo(new Enemigo(x, y, TAM_ENEMIGO, TAM_ENEMIGO, estrategia));</span>
+<span class="fc" id="L136">    }</span>
+
+    private void construirMoneda(String[] t) {
+<span class="fc" id="L139">        String tipo = t[1];</span>
+<span class="fc bfc" id="L140" title="All 2 branches covered.">        if (tipo.equals(&quot;AMARILLA&quot;)) {</span>
+<span class="fc" id="L141">            int x = Integer.parseInt(t[2]);</span>
+<span class="fc" id="L142">            int y = Integer.parseInt(t[3]);</span>
+<span class="fc" id="L143">            nivel.agregarMoneda(new MonedaAmarilla(x, y, TAM_MONEDA, TAM_MONEDA));</span>
+<span class="pc bpc" id="L144" title="1 of 2 branches missed.">        } else if (tipo.equals(&quot;SKIN&quot;)) {</span>
+<span class="fc" id="L145">            String color = t[2];</span>
+<span class="fc" id="L146">            int x = Integer.parseInt(t[3]);</span>
+<span class="fc" id="L147">            int y = Integer.parseInt(t[4]);</span>
+<span class="pc bpc" id="L148" title="3 of 4 branches missed.">            Skin skin = switch (color) {</span>
+<span class="nc" id="L149">                case &quot;ROJO&quot;  -&gt; new Blinky();</span>
+<span class="fc" id="L150">                case &quot;VERDE&quot; -&gt; new Clyde();</span>
+<span class="nc" id="L151">                case &quot;AZUL&quot;  -&gt; new Inky();</span>
+<span class="nc" id="L152">                default      -&gt; throw new TheDopoHardestGameException(&quot;Color de skin desconocido: &quot; + color);</span>
+            };
+<span class="fc" id="L154">            nivel.agregarMoneda(new MonedaSkin(x, y, TAM_MONEDA, TAM_MONEDA, skin));</span>
+<span class="fc" id="L155">        } else {</span>
+<span class="nc" id="L156">            throw new TheDopoHardestGameException(&quot;Tipo de moneda desconocido: &quot; + tipo);</span>
+        }
+<span class="fc" id="L158">    }</span>
+
+    private void construirPared(String[] t) {
+<span class="fc" id="L161">        int x = Integer.parseInt(t[1]);</span>
+<span class="fc" id="L162">        int y = Integer.parseInt(t[2]);</span>
+<span class="fc" id="L163">        int w = Integer.parseInt(t[3]);</span>
+<span class="fc" id="L164">        int h = Integer.parseInt(t[4]);</span>
+<span class="fc" id="L165">        nivel.agregarPared(new Pared(x, y, w, h));</span>
+<span class="fc" id="L166">    }</span>
+
+    private void construirElemento(String[] t) {
+<span class="fc" id="L169">        String tipo = t[1];</span>
+<span class="fc" id="L170">        int x = Integer.parseInt(t[2]);</span>
+<span class="fc" id="L171">        int y = Integer.parseInt(t[3]);</span>
+<span class="pc bpc" id="L172" title="1 of 3 branches missed.">        switch (tipo) {</span>
+<span class="fc" id="L173">            case &quot;BOMBA&quot;  -&gt; nivel.agregarBomba(new Bomba(x, y, TAM_ESPECIAL, TAM_ESPECIAL));</span>
+<span class="fc" id="L174">            case &quot;FUENTE&quot; -&gt; nivel.agregarFuenteDeVida(new FuenteDeVida(x, y, TAM_ESPECIAL, TAM_ESPECIAL));</span>
+<span class="nc" id="L175">            default       -&gt; throw new TheDopoHardestGameException(&quot;Elemento desconocido: &quot; + tipo);</span>
+        }
+<span class="fc" id="L177">    }</span>
+
+<span class="nc" id="L179">    public Nivel obtenerNivel() { return nivel; }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

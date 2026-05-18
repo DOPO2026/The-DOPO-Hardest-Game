@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Nivel.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in The-DOPO-Hardest-Game Coverage Results</a> &gt; <a href="index.source.html" class="el_package">domain.core</a> &gt; <span class="el_source">Nivel.java</span></div><h1>Nivel.java</h1><pre class="source lang-java linenums">package domain.core;
+
+import domain.collectibles.Bomba;
+import domain.collectibles.FuenteDeVida;
+import domain.collectibles.Moneda;
+import domain.enemy.Enemigo;
+import domain.player.Jugador;
+import domain.world.Pared;
+import domain.world.Zona;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class Nivel {
+    private String id;
+    private int ancho, alto;
+    private double tiempoLimite;
+    private int monedasTotales;
+    private int monedasPendientes;
+
+<span class="fc" id="L21">    private List&lt;Jugador&gt;      jugadores = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L22">    private List&lt;Enemigo&gt;      enemigos  = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L23">    private List&lt;Moneda&gt;       monedas   = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L24">    private List&lt;Pared&gt;        paredes   = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L25">    private List&lt;Zona&gt;         zonas     = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L26">    private List&lt;Bomba&gt;        bombas    = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L27">    private List&lt;FuenteDeVida&gt; fuentes   = new ArrayList&lt;&gt;();</span>
+
+<span class="fc" id="L29">    public Nivel(String id, int ancho, int alto, double tiempoLimite) {</span>
+<span class="fc" id="L30">        this.id = id;</span>
+<span class="fc" id="L31">        this.ancho = ancho;</span>
+<span class="fc" id="L32">        this.alto = alto;</span>
+<span class="fc" id="L33">        this.tiempoLimite = tiempoLimite;</span>
+<span class="fc" id="L34">    }</span>
+
+    public void actualizar(double deltaTime) {
+<span class="fc bfc" id="L37" title="All 2 branches covered.">        for (Enemigo e : enemigos) e.actualizar(deltaTime, this);</span>
+<span class="fc" id="L38">    }</span>
+
+    public void reset() {
+<span class="fc" id="L41">        reiniciarMonedas();</span>
+<span class="fc" id="L42">    }</span>
+
+    /** Devuelve todas las monedas a su estado inicial (no recolectadas). */
+    public void reiniciarMonedas() {
+<span class="fc bfc" id="L46" title="All 2 branches covered.">        for (Moneda m : monedas) m.reiniciar();</span>
+<span class="fc" id="L47">        monedasPendientes = monedasTotales;</span>
+<span class="fc" id="L48">    }</span>
+
+<span class="fc" id="L50">    public void agregarJugador(Jugador j)        { jugadores.add(j); }</span>
+<span class="fc" id="L51">    public void agregarEnemigo(Enemigo e)        { enemigos.add(e); }</span>
+<span class="fc" id="L52">    public void agregarMoneda(Moneda m)          { monedas.add(m); monedasTotales++; monedasPendientes++; }</span>
+<span class="fc" id="L53">    public void agregarPared(Pared p)            { paredes.add(p); }</span>
+<span class="fc" id="L54">    public void agregarZona(Zona z)              { zonas.add(z); }</span>
+<span class="fc" id="L55">    public void agregarBomba(Bomba b)            { bombas.add(b); }</span>
+<span class="fc" id="L56">    public void agregarFuenteDeVida(FuenteDeVida f) { fuentes.add(f); }</span>
+
+<span class="fc" id="L58">    public String         obtenerId()        { return id; }</span>
+<span class="fc" id="L59">    public List&lt;Jugador&gt;  getJugadores()     { return jugadores; }</span>
+<span class="fc" id="L60">    public List&lt;Enemigo&gt;  getEnemigos()      { return enemigos; }</span>
+<span class="fc" id="L61">    public List&lt;Moneda&gt;   getMonedas()       { return monedas; }</span>
+<span class="fc" id="L62">    public List&lt;Pared&gt;    getParedes()       { return paredes; }</span>
+<span class="fc" id="L63">    public List&lt;Zona&gt;     getZonas()         { return zonas; }</span>
+<span class="fc" id="L64">    public List&lt;Bomba&gt;    getBombas()        { return bombas; }</span>
+<span class="fc" id="L65">    public List&lt;FuenteDeVida&gt; getFuentes()   { return fuentes; }</span>
+
+<span class="fc" id="L67">    public int    obtenerAncho()           { return ancho; }</span>
+<span class="fc" id="L68">    public int    obtenerAlto()            { return alto; }</span>
+<span class="fc" id="L69">    public double obtenerTiempoLimite()    { return tiempoLimite; }</span>
+<span class="fc" id="L70">    public int    obtenerMonedasPendientes() { return monedasPendientes; }</span>
+<span class="fc" id="L71">    public int    obtenerMonedasTotales()    { return monedasTotales; }</span>
+<span class="pc bpc" id="L72" title="1 of 2 branches missed.">    public void   registrarRecoleccion()   { if (monedasPendientes &gt; 0) monedasPendientes--; }</span>
+<span class="fc bfc" id="L73" title="All 2 branches covered.">    public boolean estaCompleto()          { return monedasPendientes &lt;= 0; }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

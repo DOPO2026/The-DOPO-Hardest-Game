@@ -1,0 +1,324 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MenuManager.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in The-DOPO-Hardest-Game Coverage Results</a> &gt; <a href="index.source.html" class="el_package">presentation</a> &gt; <span class="el_source">MenuManager.java</span></div><h1>MenuManager.java</h1><pre class="source lang-java linenums">package presentation;
+
+import domain.core.ModoJuego;
+import domain.skins.Blinky;
+import domain.skins.Clyde;
+import domain.skins.ColorJuego;
+import domain.skins.Inky;
+import domain.skins.Skin;
+import javax.swing.*;
+import java.awt.*;
+import java.util.function.Consumer;
+
+/**
+ * Menú navegable construido con CardLayout. Las pantallas son:
+ *   principal → modo → personaje (J1 [→ J2]) → color (J1 [→ J2]) → nivel → callback
+ * Cuando se completa la selección, invoca alListo con el SeleccionMenu.
+ */
+public class MenuManager extends JPanel {
+
+<span class="nc" id="L20">    private final CardLayout layout = new CardLayout();</span>
+<span class="nc" id="L21">    private final JPanel cards      = new JPanel(layout);</span>
+<span class="nc" id="L22">    private final SeleccionMenu seleccion = new SeleccionMenu();</span>
+    private final Consumer&lt;SeleccionMenu&gt; alListo;
+
+<span class="nc" id="L25">    private int jugadorActual = 0; // 0 = J1, 1 = J2</span>
+
+<span class="nc" id="L27">    public MenuManager(Consumer&lt;SeleccionMenu&gt; alListo) {</span>
+<span class="nc" id="L28">        this.alListo = alListo;</span>
+<span class="nc" id="L29">        setLayout(new BorderLayout());</span>
+<span class="nc" id="L30">        setBackground(new Color(18, 18, 28));</span>
+<span class="nc" id="L31">        cards.setOpaque(false);</span>
+<span class="nc" id="L32">        add(cards, BorderLayout.CENTER);</span>
+
+<span class="nc" id="L34">        cards.add(crearPanelPrincipal(),  &quot;principal&quot;);</span>
+<span class="nc" id="L35">        cards.add(crearPanelModo(),       &quot;modo&quot;);</span>
+<span class="nc" id="L36">        cards.add(crearPanelPersonaje(),  &quot;personaje&quot;);</span>
+<span class="nc" id="L37">        cards.add(crearPanelColor(),      &quot;color&quot;);</span>
+<span class="nc" id="L38">        cards.add(crearPanelNivel(),      &quot;nivel&quot;);</span>
+
+<span class="nc" id="L40">        layout.show(cards, &quot;principal&quot;);</span>
+<span class="nc" id="L41">    }</span>
+
+<span class="nc" id="L43">    public void mostrarPrincipal() { layout.show(cards, &quot;principal&quot;); }</span>
+
+    // ── Pantalla 1: Principal ────────────────────────────────────────────────
+    private JPanel crearPanelPrincipal() {
+<span class="nc" id="L47">        JPanel p = panelBase();</span>
+<span class="nc" id="L48">        p.add(titulo(&quot;THE DOPO HARDEST GAME&quot;));</span>
+<span class="nc" id="L49">        p.add(Box.createVerticalStrut(30));</span>
+<span class="nc" id="L50">        p.add(subtitulo(&quot;Rodriguez &amp; Villamizar&quot;));</span>
+<span class="nc" id="L51">        p.add(Box.createVerticalStrut(8));</span>
+<span class="nc" id="L52">        p.add(subtitulo(&quot;DOPO 2026-1&quot;));</span>
+<span class="nc" id="L53">        p.add(Box.createVerticalStrut(60));</span>
+<span class="nc" id="L54">        p.add(boton(&quot;JUGAR&quot;,  () -&gt; layout.show(cards, &quot;modo&quot;)));</span>
+<span class="nc" id="L55">        p.add(Box.createVerticalStrut(15));</span>
+<span class="nc" id="L56">        p.add(boton(&quot;SALIR&quot;,  () -&gt; System.exit(0)));</span>
+<span class="nc" id="L57">        return p;</span>
+    }
+
+    // ── Pantalla 2: Modo de juego ────────────────────────────────────────────
+    private JPanel crearPanelModo() {
+<span class="nc" id="L62">        JPanel p = panelBase();</span>
+<span class="nc" id="L63">        p.add(titulo(&quot;SELECCIONA MODO&quot;));</span>
+<span class="nc" id="L64">        p.add(Box.createVerticalStrut(40));</span>
+
+<span class="nc" id="L66">        p.add(botonDescriptivo(&quot;1 JUGADOR&quot;,        &quot;Un humano contra el nivel&quot;,      () -&gt; elegirModo(ModoJuego.PLAYER)));</span>
+<span class="nc" id="L67">        p.add(Box.createVerticalStrut(15));</span>
+<span class="nc" id="L68">        p.add(botonDescriptivo(&quot;JUGADOR vs JUGADOR&quot;, &quot;Dos humanos en zonas opuestas&quot;,   () -&gt; elegirModo(ModoJuego.PvsP)));</span>
+<span class="nc" id="L69">        p.add(Box.createVerticalStrut(15));</span>
+<span class="nc" id="L70">        p.add(botonDescriptivo(&quot;JUGADOR vs MAQUINA&quot;, &quot;Humano contra IA aleatoria&quot;,      () -&gt; elegirModo(ModoJuego.PvsM)));</span>
+<span class="nc" id="L71">        p.add(Box.createVerticalStrut(30));</span>
+<span class="nc" id="L72">        p.add(botonSecundario(&quot;← Atrás&quot;, () -&gt; layout.show(cards, &quot;principal&quot;)));</span>
+<span class="nc" id="L73">        return p;</span>
+    }
+
+    private void elegirModo(ModoJuego modo) {
+<span class="nc" id="L77">        seleccion.modo = modo;</span>
+<span class="nc" id="L78">        jugadorActual = 0;</span>
+<span class="nc" id="L79">        actualizarPanelPersonaje();</span>
+<span class="nc" id="L80">        layout.show(cards, &quot;personaje&quot;);</span>
+<span class="nc" id="L81">    }</span>
+
+    // ── Pantalla 3: Personaje (skin) ─────────────────────────────────────────
+    private JPanel panelPersonaje;
+    private JLabel lblPersonaje;
+    private JPanel crearPanelPersonaje() {
+<span class="nc" id="L87">        panelPersonaje = panelBase();</span>
+<span class="nc" id="L88">        lblPersonaje   = titulo(&quot;PERSONAJE J1&quot;);</span>
+<span class="nc" id="L89">        panelPersonaje.add(lblPersonaje);</span>
+<span class="nc" id="L90">        panelPersonaje.add(Box.createVerticalStrut(20));</span>
+<span class="nc" id="L91">        panelPersonaje.add(subtitulo(&quot;Atributos: velocidad / vidas / tamaño&quot;));</span>
+<span class="nc" id="L92">        panelPersonaje.add(Box.createVerticalStrut(30));</span>
+
+<span class="nc" id="L94">        JPanel fila = new JPanel(new FlowLayout(FlowLayout.CENTER, 25, 0));</span>
+<span class="nc" id="L95">        fila.setOpaque(false);</span>
+<span class="nc" id="L96">        fila.add(tarjetaPersonaje(new Blinky(), &quot;Rápido y frágil&quot;));</span>
+<span class="nc" id="L97">        fila.add(tarjetaPersonaje(new Clyde(),  &quot;Más vidas (escudo)&quot;));</span>
+<span class="nc" id="L98">        fila.add(tarjetaPersonaje(new Inky(),   &quot;Veloz pero grande&quot;));</span>
+<span class="nc" id="L99">        panelPersonaje.add(fila);</span>
+<span class="nc" id="L100">        return panelPersonaje;</span>
+    }
+
+    private void actualizarPanelPersonaje() {
+<span class="nc bnc" id="L104" title="All 2 branches missed.">        lblPersonaje.setText(jugadorActual == 0 ? &quot;PERSONAJE J1&quot; : &quot;PERSONAJE J2&quot;);</span>
+<span class="nc" id="L105">    }</span>
+
+    private JComponent tarjetaPersonaje(Skin skin, String descripcion) {
+<span class="nc" id="L108">        JPanel card = new JPanel();</span>
+<span class="nc" id="L109">        card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));</span>
+<span class="nc" id="L110">        card.setBackground(new Color(36, 36, 56));</span>
+<span class="nc" id="L111">        card.setBorder(BorderFactory.createLineBorder(toAwt(skin.obtenerColor()), 3));</span>
+<span class="nc" id="L112">        card.setPreferredSize(new Dimension(190, 220));</span>
+
+<span class="nc" id="L114">        JLabel nombre = new JLabel(skin.obtenerNombre());</span>
+<span class="nc" id="L115">        nombre.setForeground(toAwt(skin.obtenerColor()));</span>
+<span class="nc" id="L116">        nombre.setFont(new Font(&quot;Arial&quot;, Font.BOLD, 22));</span>
+<span class="nc" id="L117">        nombre.setAlignmentX(CENTER_ALIGNMENT);</span>
+
+<span class="nc" id="L119">        JPanel muestra = new JPanel() {</span>
+            @Override protected void paintComponent(Graphics g) {
+<span class="nc" id="L121">                super.paintComponent(g);</span>
+<span class="nc" id="L122">                int s = 50;</span>
+<span class="nc" id="L123">                g.setColor(toAwt(skin.obtenerColor()));</span>
+<span class="nc" id="L124">                g.fillRect(getWidth()/2 - s/2, 10, s, s);</span>
+<span class="nc" id="L125">            }</span>
+        };
+<span class="nc" id="L127">        muestra.setOpaque(false);</span>
+<span class="nc" id="L128">        muestra.setPreferredSize(new Dimension(190, 70));</span>
+<span class="nc" id="L129">        muestra.setMaximumSize(new Dimension(190, 70));</span>
+
+<span class="nc" id="L131">        JLabel stats = new JLabel(String.format(</span>
+                &quot;&lt;html&gt;&lt;center&gt;Vel: %.1fx&lt;br&gt;Vidas: %d&lt;br&gt;Tam: %.1fx&lt;/center&gt;&lt;/html&gt;&quot;,
+<span class="nc" id="L133">                skin.obtenerVelocidad(), skin.obtenerVidas(), skin.obtenerTamanio()));</span>
+<span class="nc" id="L134">        stats.setForeground(Color.WHITE);</span>
+<span class="nc" id="L135">        stats.setAlignmentX(CENTER_ALIGNMENT);</span>
+<span class="nc" id="L136">        stats.setFont(new Font(&quot;Monospaced&quot;, Font.PLAIN, 13));</span>
+
+<span class="nc" id="L138">        JLabel desc = new JLabel(descripcion);</span>
+<span class="nc" id="L139">        desc.setForeground(new Color(180, 180, 180));</span>
+<span class="nc" id="L140">        desc.setAlignmentX(CENTER_ALIGNMENT);</span>
+<span class="nc" id="L141">        desc.setFont(new Font(&quot;Arial&quot;, Font.ITALIC, 11));</span>
+
+<span class="nc" id="L143">        JButton seleccionar = new JButton(&quot;Elegir&quot;);</span>
+<span class="nc" id="L144">        seleccionar.setAlignmentX(CENTER_ALIGNMENT);</span>
+<span class="nc" id="L145">        seleccionar.addActionListener(ev -&gt; elegirSkin(skin));</span>
+
+<span class="nc" id="L147">        card.add(Box.createVerticalStrut(10));</span>
+<span class="nc" id="L148">        card.add(nombre);</span>
+<span class="nc" id="L149">        card.add(muestra);</span>
+<span class="nc" id="L150">        card.add(stats);</span>
+<span class="nc" id="L151">        card.add(Box.createVerticalStrut(6));</span>
+<span class="nc" id="L152">        card.add(desc);</span>
+<span class="nc" id="L153">        card.add(Box.createVerticalStrut(8));</span>
+<span class="nc" id="L154">        card.add(seleccionar);</span>
+<span class="nc" id="L155">        return card;</span>
+    }
+
+    private void elegirSkin(Skin skin) {
+<span class="nc bnc" id="L159" title="All 2 branches missed.">        if (jugadorActual == 0) seleccion.skinJ1 = skin;</span>
+<span class="nc" id="L160">        else                    seleccion.skinJ2 = skin;</span>
+<span class="nc" id="L161">        actualizarPanelColor();</span>
+<span class="nc" id="L162">        layout.show(cards, &quot;color&quot;);</span>
+<span class="nc" id="L163">    }</span>
+
+    // ── Pantalla 4: Color de borde ───────────────────────────────────────────
+    private JPanel panelColor;
+    private JLabel lblColor;
+    private JPanel crearPanelColor() {
+<span class="nc" id="L169">        panelColor = panelBase();</span>
+<span class="nc" id="L170">        lblColor   = titulo(&quot;COLOR DE BORDE J1&quot;);</span>
+<span class="nc" id="L171">        panelColor.add(lblColor);</span>
+<span class="nc" id="L172">        panelColor.add(Box.createVerticalStrut(20));</span>
+<span class="nc" id="L173">        panelColor.add(subtitulo(&quot;Identifica visualmente a tu jugador&quot;));</span>
+<span class="nc" id="L174">        panelColor.add(Box.createVerticalStrut(40));</span>
+
+<span class="nc" id="L176">        JPanel grid = new JPanel(new GridLayout(2, 4, 18, 18));</span>
+<span class="nc" id="L177">        grid.setOpaque(false);</span>
+<span class="nc" id="L178">        grid.setMaximumSize(new Dimension(640, 200));</span>
+<span class="nc bnc" id="L179" title="All 2 branches missed.">        for (ColorJuego c : ColorJuego.values()) grid.add(swatch(c));</span>
+<span class="nc" id="L180">        panelColor.add(grid);</span>
+<span class="nc" id="L181">        return panelColor;</span>
+    }
+
+    private void actualizarPanelColor() {
+<span class="nc bnc" id="L185" title="All 2 branches missed.">        lblColor.setText(jugadorActual == 0 ? &quot;COLOR DE BORDE J1&quot; : &quot;COLOR DE BORDE J2&quot;);</span>
+<span class="nc" id="L186">    }</span>
+
+    private JButton swatch(ColorJuego c) {
+<span class="nc" id="L189">        JButton b = new JButton(c.name());</span>
+<span class="nc" id="L190">        b.setBackground(toAwt(c));</span>
+<span class="nc bnc" id="L191" title="All 2 branches missed.">        b.setForeground(brilloRelativo(c) &lt; 128 ? Color.WHITE : Color.BLACK);</span>
+<span class="nc" id="L192">        b.setFont(new Font(&quot;Arial&quot;, Font.BOLD, 14));</span>
+<span class="nc" id="L193">        b.setFocusPainted(false);</span>
+<span class="nc" id="L194">        b.setPreferredSize(new Dimension(140, 80));</span>
+<span class="nc" id="L195">        b.addActionListener(ev -&gt; elegirColor(c));</span>
+<span class="nc" id="L196">        return b;</span>
+    }
+
+    private void elegirColor(ColorJuego c) {
+<span class="nc bnc" id="L200" title="All 2 branches missed.">        if (jugadorActual == 0) seleccion.colorJ1 = c;</span>
+<span class="nc" id="L201">        else                    seleccion.colorJ2 = c;</span>
+
+<span class="nc bnc" id="L203" title="All 4 branches missed.">        boolean necesitaJ2 = (seleccion.modo == ModoJuego.PvsP) &amp;&amp; jugadorActual == 0;</span>
+<span class="nc bnc" id="L204" title="All 2 branches missed.">        if (necesitaJ2) {</span>
+<span class="nc" id="L205">            jugadorActual = 1;</span>
+<span class="nc" id="L206">            actualizarPanelPersonaje();</span>
+<span class="nc" id="L207">            layout.show(cards, &quot;personaje&quot;);</span>
+        } else {
+<span class="nc" id="L209">            layout.show(cards, &quot;nivel&quot;);</span>
+        }
+<span class="nc" id="L211">    }</span>
+
+    // ── Pantalla 5: Selección de nivel ───────────────────────────────────────
+    private JPanel crearPanelNivel() {
+<span class="nc" id="L215">        JPanel p = panelBase();</span>
+<span class="nc" id="L216">        p.add(titulo(&quot;SELECCIONA NIVEL&quot;));</span>
+<span class="nc" id="L217">        p.add(Box.createVerticalStrut(20));</span>
+<span class="nc" id="L218">        p.add(subtitulo(&quot;Configuraciones disponibles&quot;));</span>
+<span class="nc" id="L219">        p.add(Box.createVerticalStrut(40));</span>
+
+<span class="nc" id="L221">        String[][] niveles = {</span>
+                {&quot;NIVEL 1&quot;, &quot;El original — 90s&quot;,       &quot;resources/configuraciones/nivel1.txt&quot;},
+                {&quot;NIVEL 2&quot;, &quot;Checkpoint + skin — 75s&quot;, &quot;resources/configuraciones/nivel2.txt&quot;},
+                {&quot;NIVEL 3&quot;, &quot;Acelerados + bomba — 60s&quot;,&quot;resources/configuraciones/nivel3.txt&quot;},
+        };
+<span class="nc bnc" id="L226" title="All 2 branches missed.">        for (String[] n : niveles) {</span>
+<span class="nc" id="L227">            p.add(botonDescriptivo(n[0], n[1], () -&gt; elegirNivel(n[2])));</span>
+<span class="nc" id="L228">            p.add(Box.createVerticalStrut(12));</span>
+        }
+<span class="nc" id="L230">        return p;</span>
+    }
+
+    private void elegirNivel(String ruta) {
+<span class="nc" id="L234">        seleccion.rutaNivel = ruta;</span>
+<span class="nc bnc" id="L235" title="All 2 branches missed.">        if (seleccion.skinJ1 == null) seleccion.skinJ1 = new Blinky();</span>
+<span class="nc bnc" id="L236" title="All 4 branches missed.">        if (seleccion.modo != ModoJuego.PLAYER &amp;&amp; seleccion.skinJ2 == null) seleccion.skinJ2 = new Inky();</span>
+<span class="nc" id="L237">        alListo.accept(seleccion);</span>
+<span class="nc" id="L238">    }</span>
+
+    // ── Helpers visuales ─────────────────────────────────────────────────────
+    private JPanel panelBase() {
+<span class="nc" id="L242">        JPanel p = new JPanel();</span>
+<span class="nc" id="L243">        p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));</span>
+<span class="nc" id="L244">        p.setOpaque(false);</span>
+<span class="nc" id="L245">        p.setBorder(BorderFactory.createEmptyBorder(60, 60, 40, 60));</span>
+<span class="nc" id="L246">        return p;</span>
+    }
+
+    private JLabel titulo(String texto) {
+<span class="nc" id="L250">        JLabel l = new JLabel(texto);</span>
+<span class="nc" id="L251">        l.setFont(new Font(&quot;Arial&quot;, Font.BOLD, 36));</span>
+<span class="nc" id="L252">        l.setForeground(new Color(230, 230, 240));</span>
+<span class="nc" id="L253">        l.setAlignmentX(CENTER_ALIGNMENT);</span>
+<span class="nc" id="L254">        return l;</span>
+    }
+
+    private JLabel subtitulo(String texto) {
+<span class="nc" id="L258">        JLabel l = new JLabel(texto);</span>
+<span class="nc" id="L259">        l.setFont(new Font(&quot;Arial&quot;, Font.ITALIC, 15));</span>
+<span class="nc" id="L260">        l.setForeground(new Color(180, 180, 200));</span>
+<span class="nc" id="L261">        l.setAlignmentX(CENTER_ALIGNMENT);</span>
+<span class="nc" id="L262">        return l;</span>
+    }
+
+    private JButton boton(String texto, Runnable accion) {
+<span class="nc" id="L266">        JButton b = new JButton(texto);</span>
+<span class="nc" id="L267">        b.setFont(new Font(&quot;Arial&quot;, Font.BOLD, 18));</span>
+<span class="nc" id="L268">        b.setForeground(Color.WHITE);</span>
+<span class="nc" id="L269">        b.setBackground(new Color(60, 100, 180));</span>
+<span class="nc" id="L270">        b.setFocusPainted(false);</span>
+<span class="nc" id="L271">        b.setMaximumSize(new Dimension(280, 50));</span>
+<span class="nc" id="L272">        b.setAlignmentX(CENTER_ALIGNMENT);</span>
+<span class="nc" id="L273">        b.addActionListener(ev -&gt; accion.run());</span>
+<span class="nc" id="L274">        return b;</span>
+    }
+
+    private JButton botonSecundario(String texto, Runnable accion) {
+<span class="nc" id="L278">        JButton b = boton(texto, accion);</span>
+<span class="nc" id="L279">        b.setBackground(new Color(80, 80, 100));</span>
+<span class="nc" id="L280">        b.setFont(new Font(&quot;Arial&quot;, Font.PLAIN, 14));</span>
+<span class="nc" id="L281">        b.setMaximumSize(new Dimension(160, 36));</span>
+<span class="nc" id="L282">        return b;</span>
+    }
+
+    private JPanel botonDescriptivo(String titulo, String descripcion, Runnable accion) {
+<span class="nc" id="L286">        JPanel p = new JPanel(new BorderLayout(12, 0));</span>
+<span class="nc" id="L287">        p.setBackground(new Color(36, 36, 56));</span>
+<span class="nc" id="L288">        p.setBorder(BorderFactory.createLineBorder(new Color(70, 70, 100), 1));</span>
+<span class="nc" id="L289">        p.setMaximumSize(new Dimension(520, 70));</span>
+<span class="nc" id="L290">        p.setPreferredSize(new Dimension(520, 70));</span>
+<span class="nc" id="L291">        p.setAlignmentX(CENTER_ALIGNMENT);</span>
+
+<span class="nc" id="L293">        JLabel t = new JLabel(titulo);</span>
+<span class="nc" id="L294">        t.setFont(new Font(&quot;Arial&quot;, Font.BOLD, 18));</span>
+<span class="nc" id="L295">        t.setForeground(Color.WHITE);</span>
+<span class="nc" id="L296">        t.setBorder(BorderFactory.createEmptyBorder(0, 16, 0, 0));</span>
+
+<span class="nc" id="L298">        JLabel d = new JLabel(descripcion);</span>
+<span class="nc" id="L299">        d.setFont(new Font(&quot;Arial&quot;, Font.PLAIN, 13));</span>
+<span class="nc" id="L300">        d.setForeground(new Color(180, 180, 200));</span>
+<span class="nc" id="L301">        d.setBorder(BorderFactory.createEmptyBorder(0, 16, 0, 0));</span>
+
+<span class="nc" id="L303">        JPanel txt = new JPanel(new GridLayout(2, 1));</span>
+<span class="nc" id="L304">        txt.setOpaque(false);</span>
+<span class="nc" id="L305">        txt.add(t);</span>
+<span class="nc" id="L306">        txt.add(d);</span>
+
+<span class="nc" id="L308">        JButton ir = new JButton(&quot;▶&quot;);</span>
+<span class="nc" id="L309">        ir.setFont(new Font(&quot;Arial&quot;, Font.BOLD, 22));</span>
+<span class="nc" id="L310">        ir.setForeground(Color.WHITE);</span>
+<span class="nc" id="L311">        ir.setBackground(new Color(60, 100, 180));</span>
+<span class="nc" id="L312">        ir.setFocusPainted(false);</span>
+<span class="nc" id="L313">        ir.setPreferredSize(new Dimension(70, 70));</span>
+<span class="nc" id="L314">        ir.addActionListener(ev -&gt; accion.run());</span>
+
+<span class="nc" id="L316">        p.add(txt, BorderLayout.CENTER);</span>
+<span class="nc" id="L317">        p.add(ir,  BorderLayout.EAST);</span>
+<span class="nc" id="L318">        return p;</span>
+    }
+
+<span class="nc" id="L321">    private static Color toAwt(ColorJuego c) { return new Color(c.r, c.g, c.b); }</span>
+<span class="nc" id="L322">    private static int brilloRelativo(ColorJuego c) { return (c.r * 299 + c.g * 587 + c.b * 114) / 1000; }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MotorJuegoTest.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in The-DOPO-Hardest-Game Coverage Results</a> &gt; <a href="index.source.html" class="el_package">test</a> &gt; <span class="el_source">MotorJuegoTest.java</span></div><h1>MotorJuegoTest.java</h1><pre class="source lang-java linenums">package test;
+
+import domain.collectibles.Bomba;
+import domain.collectibles.FuenteDeVida;
+import domain.collectibles.Moneda;
+import domain.collectibles.MonedaAmarilla;
+import domain.collectibles.MonedaSkin;
+import domain.core.MotorJuego;
+import domain.core.Nivel;
+import domain.enemy.Basico;
+import domain.enemy.Enemigo;
+import domain.player.ControlHumano;
+import domain.player.Jugador;
+import domain.skins.Blinky;
+import domain.skins.ColorJuego;
+import domain.skins.Inky;
+import domain.world.ZonaFinal;
+import domain.world.ZonaIntermedia;
+import org.junit.jupiter.api.Test;
+import java.util.List;
+import static org.junit.jupiter.api.Assertions.*;
+
+<span class="fc" id="L23">class MotorJuegoTest {</span>
+
+    private Jugador crearJugadorEn(int x, int y) {
+<span class="fc" id="L26">        return new Jugador(x, y, 20, 20, new ControlHumano(), new Blinky(), ColorJuego.NEGRO);</span>
+    }
+
+    @Test
+    void victoriaRequiereMonedasYZonaFinal() {
+<span class="fc" id="L31">        Nivel n = new Nivel(&quot;t&quot;, 800, 600, 60);</span>
+<span class="fc" id="L32">        ZonaFinal zf = new ZonaFinal(500, 100, 100, 100);</span>
+<span class="fc" id="L33">        n.agregarZona(zf);</span>
+<span class="fc" id="L34">        n.agregarMoneda(new MonedaAmarilla(50, 50, 14, 14));</span>
+<span class="fc" id="L35">        Jugador j = crearJugadorEn(530, 130);</span>
+<span class="fc" id="L36">        n.agregarJugador(j);</span>
+
+<span class="fc" id="L38">        MotorJuego m = new MotorJuego();</span>
+        // Aún quedan monedas → no victoria
+<span class="fc" id="L40">        assertFalse(m.evaluarEstado(n));</span>
+
+<span class="fc" id="L42">        n.registrarRecoleccion();</span>
+        // Todas las monedas recolectadas y jugador en ZonaFinal → victoria
+<span class="fc" id="L44">        assertTrue(m.evaluarEstado(n));</span>
+<span class="fc" id="L45">    }</span>
+
+    @Test
+    void colisionConEnemigoMataAlJugadorSinEscudo() {
+<span class="fc" id="L49">        Nivel n = new Nivel(&quot;t&quot;, 800, 600, 60);</span>
+<span class="fc" id="L50">        Jugador j = crearJugadorEn(100, 100);</span>
+<span class="fc" id="L51">        n.agregarJugador(j);</span>
+<span class="fc" id="L52">        n.agregarEnemigo(new Enemigo(105, 100, 20, 20, new Basico(0, 0, 0, 800, 0, 600)));</span>
+
+<span class="fc" id="L54">        MotorJuego m = new MotorJuego();</span>
+<span class="fc" id="L55">        m.procesarInteracciones(n);</span>
+<span class="fc" id="L56">        assertEquals(1, j.obtenerMuertes());</span>
+<span class="fc" id="L57">    }</span>
+
+    @Test
+    void monedaSeRecolectaAlTocarla() {
+<span class="fc" id="L61">        Nivel n = new Nivel(&quot;t&quot;, 800, 600, 60);</span>
+<span class="fc" id="L62">        Jugador j = crearJugadorEn(100, 100);</span>
+<span class="fc" id="L63">        n.agregarJugador(j);</span>
+<span class="fc" id="L64">        Moneda mon = new MonedaAmarilla(105, 105, 14, 14);</span>
+<span class="fc" id="L65">        n.agregarMoneda(mon);</span>
+
+<span class="fc" id="L67">        new MotorJuego().procesarInteracciones(n);</span>
+<span class="fc" id="L68">        assertTrue(mon.estaRecolectada());</span>
+<span class="fc" id="L69">        assertEquals(0, n.obtenerMonedasPendientes());</span>
+<span class="fc" id="L70">    }</span>
+
+    @Test
+    void monedaSkinAplicaSkinAlJugador() {
+<span class="fc" id="L74">        Nivel n = new Nivel(&quot;t&quot;, 800, 600, 60);</span>
+<span class="fc" id="L75">        Jugador j = crearJugadorEn(100, 100);</span>
+<span class="fc" id="L76">        n.agregarJugador(j);</span>
+<span class="fc" id="L77">        MonedaSkin ms = new MonedaSkin(105, 105, 14, 14, new Inky());</span>
+<span class="fc" id="L78">        n.agregarMoneda(ms);</span>
+
+<span class="fc" id="L80">        new MotorJuego().procesarInteracciones(n);</span>
+
+<span class="fc" id="L82">        assertTrue(ms.estaRecolectada());</span>
+<span class="fc" id="L83">        assertEquals(&quot;Inky&quot;, j.obtenerSkinActual().obtenerNombre());</span>
+<span class="fc" id="L84">    }</span>
+
+    @Test
+    void fuenteDeVidaOtorgaEscudoAlJugador() {
+<span class="fc" id="L88">        Nivel n = new Nivel(&quot;t&quot;, 800, 600, 60);</span>
+<span class="fc" id="L89">        Jugador j = crearJugadorEn(100, 100); // Blinky: 1 vida</span>
+<span class="fc" id="L90">        n.agregarJugador(j);</span>
+<span class="fc" id="L91">        n.agregarFuenteDeVida(new FuenteDeVida(105, 105, 14, 14));</span>
+
+<span class="fc" id="L93">        new MotorJuego().procesarInteracciones(n);</span>
+
+<span class="fc" id="L95">        assertEquals(2, j.obtenerVidas());</span>
+<span class="fc" id="L96">    }</span>
+
+    @Test
+    void bombaMataaJugadorYReiniciaMonedas() {
+<span class="fc" id="L100">        Nivel n = new Nivel(&quot;t&quot;, 800, 600, 60);</span>
+<span class="fc" id="L101">        Jugador j = crearJugadorEn(100, 100);</span>
+<span class="fc" id="L102">        n.agregarJugador(j);</span>
+<span class="fc" id="L103">        n.agregarMoneda(new MonedaAmarilla(300, 300, 14, 14));</span>
+<span class="fc" id="L104">        n.registrarRecoleccion(); // simular que ya estaba recogida → pendientes=0</span>
+<span class="fc" id="L105">        n.agregarBomba(new Bomba(105, 105, 14, 14));</span>
+
+<span class="fc" id="L107">        new MotorJuego().procesarInteracciones(n);</span>
+
+<span class="fc" id="L109">        assertEquals(1, j.obtenerMuertes());</span>
+<span class="fc" id="L110">        assertEquals(1, n.obtenerMonedasPendientes()); // reiniciarMonedas la restauró</span>
+<span class="fc" id="L111">    }</span>
+
+    @Test
+    void zonaIntermediaCambiaRespawnDelJugador() {
+<span class="fc" id="L115">        Nivel n = new Nivel(&quot;t&quot;, 800, 600, 60);</span>
+<span class="fc" id="L116">        Jugador j = crearJugadorEn(100, 100); // respawn original (100,100)</span>
+<span class="fc" id="L117">        n.agregarJugador(j);</span>
+<span class="fc" id="L118">        n.agregarZona(new ZonaIntermedia(50, 50, 200, 200)); // contiene a (100,100)</span>
+
+<span class="fc" id="L120">        new MotorJuego().procesarInteracciones(n); // activa checkpoint</span>
+<span class="fc" id="L121">        j.morir(); // va al nuevo respawn: 50+(200-20)/2=140, 50+(200-20)/2=140</span>
+
+<span class="fc" id="L123">        assertEquals(140, j.obtenerPosX());</span>
+<span class="fc" id="L124">        assertEquals(140, j.obtenerPosY());</span>
+<span class="fc" id="L125">    }</span>
+
+    @Test
+    void colisionPvPMataAmbosJugadores() {
+<span class="fc" id="L129">        Nivel n = new Nivel(&quot;t&quot;, 800, 600, 60);</span>
+<span class="fc" id="L130">        Jugador j1 = crearJugadorEn(100, 100);</span>
+<span class="fc" id="L131">        Jugador j2 = crearJugadorEn(105, 105); // superpuestos con j1</span>
+<span class="fc" id="L132">        n.agregarJugador(j1);</span>
+<span class="fc" id="L133">        n.agregarJugador(j2);</span>
+
+<span class="fc" id="L135">        new MotorJuego().procesarInteracciones(n);</span>
+
+<span class="fc" id="L137">        assertEquals(1, j1.obtenerMuertes());</span>
+<span class="fc" id="L138">        assertEquals(1, j2.obtenerMuertes());</span>
+<span class="fc" id="L139">    }</span>
+
+    @Test
+    void morirReiniciaMonedasRecolectadas() {
+<span class="fc" id="L143">        Nivel n = new Nivel(&quot;t&quot;, 800, 600, 60);</span>
+<span class="fc" id="L144">        Jugador j = crearJugadorEn(100, 100);</span>
+<span class="fc" id="L145">        n.agregarJugador(j);</span>
+<span class="fc" id="L146">        Moneda mon = new MonedaAmarilla(150, 150, 14, 14);</span>
+<span class="fc" id="L147">        n.agregarMoneda(mon);</span>
+<span class="fc" id="L148">        mon.recolectar();</span>
+<span class="fc" id="L149">        n.registrarRecoleccion();</span>
+
+        // Enemigo encima del jugador → muerte
+<span class="fc" id="L152">        n.agregarEnemigo(new Enemigo(100, 100, 20, 20, new Basico(0, 0, 0, 800, 0, 600)));</span>
+<span class="fc" id="L153">        new MotorJuego().procesarInteracciones(n);</span>
+
+<span class="fc" id="L155">        assertFalse(mon.estaRecolectada(), &quot;La moneda debe volver a su estado inicial tras morir&quot;);</span>
+<span class="fc" id="L156">        assertEquals(1, n.obtenerMonedasPendientes());</span>
+<span class="fc" id="L157">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

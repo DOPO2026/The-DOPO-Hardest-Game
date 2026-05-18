@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ControlPanel.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in The-DOPO-Hardest-Game Coverage Results</a> &gt; <a href="index.source.html" class="el_package">presentation</a> &gt; <span class="el_source">ControlPanel.java</span></div><h1>ControlPanel.java</h1><pre class="source lang-java linenums">package presentation;
+
+import domain.core.TheDOPOHardestGame;
+import javax.swing.*;
+import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
+
+public class ControlPanel extends JPanel {
+    private TheDOPOHardestGame juego;
+    private JLabel lblTiempo;
+    private JLabel lblMonedas;
+    private JLabel lblEstadoJuego;
+    private JLabel lblMensaje;
+    private JPanel panelStatsJugadores;
+    private List&lt;JLabel&gt; lblMuertes;
+    private List&lt;JLabel&gt; lblVidas;
+
+<span class="nc" id="L19">    public ControlPanel(TheDOPOHardestGame juego) {</span>
+<span class="nc" id="L20">        this.juego = juego;</span>
+<span class="nc" id="L21">        lblMuertes = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L22">        lblVidas   = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L23">        setLayout(new FlowLayout(FlowLayout.LEFT, 14, 6));</span>
+<span class="nc" id="L24">        setBackground(new Color(18, 18, 28));</span>
+<span class="nc" id="L25">        setPreferredSize(new Dimension(800, 42));</span>
+
+<span class="nc" id="L27">        lblTiempo           = etiqueta(&quot;Tiempo: --&quot;);</span>
+<span class="nc" id="L28">        panelStatsJugadores = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));</span>
+<span class="nc" id="L29">        panelStatsJugadores.setOpaque(false);</span>
+<span class="nc" id="L30">        lblMonedas          = etiqueta(&quot;Monedas: 0/0&quot;);</span>
+<span class="nc" id="L31">        lblEstadoJuego      = etiqueta(&quot;Estado: MENU&quot;);</span>
+<span class="nc" id="L32">        lblMensaje          = etiqueta(&quot;WASD: mover  |  ESC: pausa  |  R: reiniciar  |  M: menú&quot;);</span>
+<span class="nc" id="L33">        lblMensaje.setForeground(new Color(160, 160, 160));</span>
+
+<span class="nc" id="L35">        add(lblTiempo);</span>
+<span class="nc" id="L36">        add(panelStatsJugadores);</span>
+<span class="nc" id="L37">        add(lblMonedas);</span>
+<span class="nc" id="L38">        add(lblEstadoJuego);</span>
+<span class="nc" id="L39">        add(lblMensaje);</span>
+<span class="nc" id="L40">    }</span>
+
+    private JLabel etiqueta(String texto) {
+<span class="nc" id="L43">        JLabel l = new JLabel(texto);</span>
+<span class="nc" id="L44">        l.setForeground(Color.WHITE);</span>
+<span class="nc" id="L45">        l.setFont(new Font(&quot;Monospaced&quot;, Font.BOLD, 12));</span>
+<span class="nc" id="L46">        return l;</span>
+    }
+
+    private void asegurarFilasJugadores(int n) {
+<span class="nc bnc" id="L50" title="All 2 branches missed.">        while (lblMuertes.size() &lt; n) {</span>
+<span class="nc" id="L51">            int idx = lblMuertes.size() + 1;</span>
+<span class="nc" id="L52">            JLabel lm = etiqueta(&quot;M J&quot; + idx + &quot;: 0&quot;);</span>
+<span class="nc" id="L53">            JLabel lv = etiqueta(&quot;♥ J&quot; + idx + &quot;: 1&quot;);</span>
+<span class="nc" id="L54">            lv.setForeground(new Color(255, 120, 120));</span>
+<span class="nc" id="L55">            lblMuertes.add(lm);</span>
+<span class="nc" id="L56">            lblVidas.add(lv);</span>
+<span class="nc" id="L57">            panelStatsJugadores.add(lm);</span>
+<span class="nc" id="L58">            panelStatsJugadores.add(lv);</span>
+<span class="nc" id="L59">        }</span>
+<span class="nc" id="L60">        panelStatsJugadores.revalidate();</span>
+<span class="nc" id="L61">    }</span>
+
+    public void actualizarEstado(double tiempo, List&lt;Integer&gt; muertesPorJugador,
+                                 List&lt;Integer&gt; vidasPorJugador, int monedas, int total) {
+<span class="nc" id="L65">        lblTiempo.setText(String.format(&quot;T: %.0fs&quot;, tiempo));</span>
+<span class="nc" id="L66">        asegurarFilasJugadores(muertesPorJugador.size());</span>
+<span class="nc bnc" id="L67" title="All 2 branches missed.">        for (int i = 0; i &lt; muertesPorJugador.size(); i++) {</span>
+<span class="nc" id="L68">            lblMuertes.get(i).setText(&quot;M J&quot; + (i + 1) + &quot;: &quot; + muertesPorJugador.get(i));</span>
+<span class="nc" id="L69">            lblVidas.get(i).setText(&quot;♥ J&quot; + (i + 1) + &quot;: &quot; + vidasPorJugador.get(i));</span>
+        }
+<span class="nc" id="L71">        lblMonedas.setText(&quot;Monedas: &quot; + monedas + &quot;/&quot; + total);</span>
+<span class="nc" id="L72">        lblEstadoJuego.setText(&quot;Estado: &quot; + juego.getEstado());</span>
+<span class="nc" id="L73">    }</span>
+
+<span class="nc" id="L75">    public void mostrarMensaje(String mensaje) { lblMensaje.setText(mensaje); }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

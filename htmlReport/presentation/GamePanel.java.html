@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GamePanel.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in The-DOPO-Hardest-Game Coverage Results</a> &gt; <a href="index.source.html" class="el_package">presentation</a> &gt; <span class="el_source">GamePanel.java</span></div><h1>GamePanel.java</h1><pre class="source lang-java linenums">package presentation;
+
+import domain.collectibles.Bomba;
+import domain.collectibles.FuenteDeVida;
+import domain.collectibles.Moneda;
+import domain.core.EstadoJuego;
+import domain.core.Nivel;
+import domain.core.TheDOPOHardestGame;
+import domain.enemy.Enemigo;
+import domain.world.Pared;
+import domain.world.Zona;
+import javax.swing.*;
+import java.awt.*;
+
+public class GamePanel extends JPanel {
+    private TheDOPOHardestGame juego;
+    private int escala;
+    private GameRender render;
+
+<span class="nc" id="L20">    public GamePanel(TheDOPOHardestGame juego, int escala) {</span>
+<span class="nc" id="L21">        this.juego = juego;</span>
+<span class="nc" id="L22">        this.escala = escala;</span>
+<span class="nc" id="L23">        this.render = new GameRender(escala);</span>
+<span class="nc" id="L24">        setPreferredSize(new Dimension(800, 600));</span>
+<span class="nc" id="L25">        setBackground(Color.DARK_GRAY);</span>
+<span class="nc" id="L26">    }</span>
+
+    public void ajustarTamanio(int ancho, int alto) {
+<span class="nc" id="L29">        setPreferredSize(new Dimension(ancho * escala, alto * escala));</span>
+<span class="nc" id="L30">        revalidate();</span>
+<span class="nc" id="L31">    }</span>
+
+    @Override
+    protected void paintComponent(Graphics g) {
+<span class="nc" id="L35">        super.paintComponent(g);</span>
+<span class="nc" id="L36">        Nivel nivel = juego.getNivelActual();</span>
+<span class="nc bnc" id="L37" title="All 2 branches missed.">        if (nivel == null) return;</span>
+
+<span class="nc" id="L39">        g.setColor(new Color(185, 185, 215));</span>
+<span class="nc" id="L40">        g.fillRect(0, 0, getWidth(), getHeight());</span>
+
+<span class="nc bnc" id="L42" title="All 2 branches missed.">        for (Zona z          : nivel.getZonas())    render.dibujarZonaSegura(g, z, escala);</span>
+<span class="nc bnc" id="L43" title="All 2 branches missed.">        for (Pared p         : nivel.getParedes())  render.dibujarPared(g, p, escala);</span>
+<span class="nc bnc" id="L44" title="All 2 branches missed.">        for (FuenteDeVida f  : nivel.getFuentes())  render.dibujarFuente(g, f, escala);</span>
+<span class="nc bnc" id="L45" title="All 2 branches missed.">        for (Bomba b         : nivel.getBombas())   render.dibujarBomba(g, b, escala);</span>
+<span class="nc bnc" id="L46" title="All 2 branches missed.">        for (Moneda m        : nivel.getMonedas())  render.dibujarMoneda(g, m, escala);</span>
+<span class="nc bnc" id="L47" title="All 2 branches missed.">        for (Enemigo e       : nivel.getEnemigos()) render.dibujarEnemigo(g, e, escala);</span>
+<span class="nc" id="L48">        render.dibujarTodosJugadores(g, nivel.getJugadores(), escala);</span>
+
+<span class="nc bnc" id="L50" title="All 2 branches missed.">        if (juego.getEstado() == EstadoJuego.PAUSADO) {</span>
+<span class="nc" id="L51">            g.setColor(new Color(0, 0, 0, 130));</span>
+<span class="nc" id="L52">            g.fillRect(0, 0, getWidth(), getHeight());</span>
+<span class="nc" id="L53">            g.setColor(Color.WHITE);</span>
+<span class="nc" id="L54">            g.setFont(new Font(&quot;Arial&quot;, Font.BOLD, 52));</span>
+<span class="nc" id="L55">            g.drawString(&quot;PAUSA&quot;, getWidth() / 2 - 75, getHeight() / 2);</span>
+<span class="nc" id="L56">            g.setFont(new Font(&quot;Arial&quot;, Font.PLAIN, 18));</span>
+<span class="nc" id="L57">            g.drawString(&quot;ESC para continuar&quot;, getWidth() / 2 - 85, getHeight() / 2 + 35);</span>
+        }
+
+<span class="nc" id="L60">        EstadoJuego estado = juego.getEstado();</span>
+<span class="nc bnc" id="L61" title="All 4 branches missed.">        if (estado == EstadoJuego.VICTORIA || estado == EstadoJuego.DERROTA) {</span>
+<span class="nc" id="L62">            g.setColor(new Color(0, 0, 0, 150));</span>
+<span class="nc" id="L63">            g.fillRect(0, 0, getWidth(), getHeight());</span>
+<span class="nc bnc" id="L64" title="All 2 branches missed.">            g.setColor(estado == EstadoJuego.VICTORIA ? new Color(80, 255, 80) : new Color(255, 80, 80));</span>
+<span class="nc" id="L65">            g.setFont(new Font(&quot;Arial&quot;, Font.BOLD, 52));</span>
+<span class="nc bnc" id="L66" title="All 2 branches missed.">            String msg = estado == EstadoJuego.VICTORIA ? &quot;¡VICTORIA!&quot; : &quot;¡TIEMPO!&quot;;</span>
+<span class="nc" id="L67">            g.drawString(msg, getWidth() / 2 - 100, getHeight() / 2);</span>
+<span class="nc" id="L68">            g.setFont(new Font(&quot;Arial&quot;, Font.PLAIN, 18));</span>
+<span class="nc" id="L69">            g.setColor(Color.WHITE);</span>
+<span class="nc" id="L70">            g.drawString(&quot;R: reiniciar  |  M: menú&quot;, getWidth() / 2 - 110, getHeight() / 2 + 35);</span>
+        }
+<span class="nc" id="L72">    }</span>
+
+<span class="nc" id="L74">    public void actualizarPantalla() { repaint(); }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

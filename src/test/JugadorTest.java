@@ -1,6 +1,16 @@
 package test;
 
-import domain.*;
+import domain.common.TheDopoHardestGameException;
+import domain.core.Nivel;
+import domain.player.ControlHumano;
+import domain.player.Direction;
+import domain.player.Jugador;
+import domain.skins.Blinky;
+import domain.skins.Clyde;
+import domain.skins.ColorJuego;
+import domain.skins.Skin;
+import domain.world.Pared;
+import domain.world.ZonaIntermedia;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -69,6 +79,23 @@ class JugadorTest {
         boolean murio = j.recibirGolpe();
         assertTrue(murio);
         assertEquals(1, j.obtenerMuertes());
+    }
+
+    @Test
+    void setRespawnActualizaPuntoDeReaparicion() {
+        Jugador j = crearJugador(new Blinky());
+        // Zona en (200,200,100,100): respawnX = 200+(100-20)/2=240, respawnY=240
+        j.setRespawn(new ZonaIntermedia(200, 200, 100, 100));
+        j.morir();
+        assertEquals(240, j.obtenerPosX());
+        assertEquals(240, j.obtenerPosY());
+    }
+
+    @Test
+    void agregarEscudoIncrementaVidas() {
+        Jugador j = crearJugador(new Blinky()); // 1 vida
+        j.agregarEscudo();
+        assertEquals(2, j.obtenerVidas());
     }
 
     @Test
