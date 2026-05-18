@@ -1,6 +1,8 @@
 package presentation;
 
-import domain.*;
+import domain.core.TheDOPOHardestGame;
+import domain.player.ControlHumano;
+import domain.player.Direction;
 import java.awt.event.*;
 import java.util.*;
 

@@ -1,7 +1,9 @@
 # Archivos compilados
 /bin/
+/out/
 
 # Configuraciones locales de Eclipse
 .classpath
 .project
 /.settings/
+

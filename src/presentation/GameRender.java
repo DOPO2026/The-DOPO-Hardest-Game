@@ -1,6 +1,16 @@
 package presentation;
 
-import domain.*;
+import domain.collectibles.Bomba;
+import domain.collectibles.FuenteDeVida;
+import domain.collectibles.Moneda;
+import domain.collectibles.MonedaSkin;
+import domain.enemy.Enemigo;
+import domain.player.Jugador;
+import domain.skins.ColorJuego;
+import domain.world.Pared;
+import domain.world.Zona;
+import domain.world.ZonaFinal;
+import domain.world.ZonaIntermedia;
 import java.awt.*;
 import java.util.List;
 
