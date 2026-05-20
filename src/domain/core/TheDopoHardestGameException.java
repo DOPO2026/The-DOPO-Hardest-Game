@@ -6,13 +6,13 @@ public class TheDopoHardestGameException extends RuntimeException {
         super(mensaje);
     }
 
-    // ── Jugador ───────────────────────────────────────────────────────────────
+    // Jugador
 
     public static TheDopoHardestGameException skinNull() {
         return new TheDopoHardestGameException("Skin no puede ser null");
     }
 
-    // ── TheDOPOHardestGame ────────────────────────────────────────────────────
+    // TheDOPOHardestGame 
 
     public static TheDopoHardestGameException modoNoEspecificado() {
         return new TheDopoHardestGameException("Modo de juego no especificado");
@@ -26,7 +26,7 @@ public class TheDopoHardestGameException extends RuntimeException {
         return new TheDopoHardestGameException("El nivel no tiene ZonaInicial");
     }
 
-    // ── ConstructorNivel ──────────────────────────────────────────────────────
+    // ConstructorNivel
 
     public static TheDopoHardestGameException rutaVacia() {
         return new TheDopoHardestGameException("Ruta de nivel vacía o nula");
