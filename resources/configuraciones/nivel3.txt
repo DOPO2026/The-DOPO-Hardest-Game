@@ -1,32 +1,22 @@
-# Nivel 3 - Avanzado: dos pasillos paralelos, acelerados, bomba y fuente de vida
-
 NIVEL;3
 TIEMPO;60
 TABLERO;800;558
 
-# Zonas seguras altas para abarcar los dos pasillos
 ZONA;INICIO;20;130;120;300
 ZONA;FIN;660;130;120;300
 
-# Paredes: marco superior, marco inferior y franja central que divide el pasillo
 PARED;140;10;520;120
 PARED;140;430;520;118
 PARED;140;265;520;30
 
-# Pasillo superior (y=130..265): acelerados horizontales rápidos
 ENEMIGO;ACELERADO;160;160;4;0;145;655;130;265
 ENEMIGO;ACELERADO;620;215;-4;0;145;655;130;265
-
-# Pasillo inferior (y=295..430): mezcla de acelerado y básico
 ENEMIGO;ACELERADO;160;390;4;0;145;655;295;430
 ENEMIGO;BASICO;620;320;-4;0;145;655;295;430
 ENEMIGO;BASICO;380;395;-4;0;145;655;295;430
-# Patrullero: patrulla el pasillo inferior central
 ENEMIGO;PATRULLERO;280;320;230;300;530;420
-# Deslizador vertical entre los dos pasillos (zona central)
 ENEMIGO;DESLIZADORV;400;150;135;255
 
-# Monedas (4 en pasillo superior, 4 en pasillo inferior)
 MONEDA;AMARILLA;230;190
 MONEDA;AMARILLA;360;190
 MONEDA;AMARILLA;490;190
@@ -36,6 +26,5 @@ MONEDA;AMARILLA;360;360
 MONEDA;AMARILLA;490;360
 MONEDA;AMARILLA;590;360
 
-# Elementos especiales: bomba en pasillo superior, fuente de vida en pasillo inferior
 ELEMENTO;BOMBA;420;205
 ELEMENTO;FUENTE;420;350

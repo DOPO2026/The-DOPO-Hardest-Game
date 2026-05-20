@@ -143,6 +143,8 @@ public class MenuManager extends JPanel {
         fila.add(tarjetaPersonaje(new Clyde(),  "Más vidas (escudo)"));
         fila.add(tarjetaPersonaje(new Inky(),   "Veloz pero grande"));
         panelPersonaje.add(fila);
+        panelPersonaje.add(Box.createVerticalStrut(30));
+        panelPersonaje.add(botonSecundario("← Atrás", this::retrocederDesdePersonaje));
         return panelPersonaje;
     }
 
@@ -201,6 +203,18 @@ public class MenuManager extends JPanel {
         return card;
     }
 
+    private void retrocederDesdePersonaje() {
+        if (jugadorActual == 1) {
+            jugadorActual = 0;
+            actualizarPanelColor();
+            layout.show(cards, "color");
+        } else if (seleccion.modo == ModoJuego.PvsM) {
+            layout.show(cards, "maquina");
+        } else {
+            layout.show(cards, "modo");
+        }
+    }
+
     private void elegirSkin(Skin skin) {
         if (jugadorActual == 0) seleccion.skinJ1 = skin;
         else                    seleccion.skinJ2 = skin;
@@ -224,6 +238,11 @@ public class MenuManager extends JPanel {
         grid.setMaximumSize(new Dimension(640, 200));
         for (ColorJuego c : ColorJuego.values()) grid.add(swatch(c));
         panelColor.add(grid);
+        panelColor.add(Box.createVerticalStrut(30));
+        panelColor.add(botonSecundario("← Atrás", () -> {
+            actualizarPanelPersonaje();
+            layout.show(cards, "personaje");
+        }));
         return panelColor;
     }
 
@@ -273,6 +292,11 @@ public class MenuManager extends JPanel {
             p.add(botonDescriptivo(n[0], n[1], () -> elegirNivel(n[2])));
             p.add(Box.createVerticalStrut(12));
         }
+        p.add(Box.createVerticalStrut(10));
+        p.add(botonSecundario("← Atrás", () -> {
+            actualizarPanelColor();
+            layout.show(cards, "color");
+        }));
         return p;
     }
 
