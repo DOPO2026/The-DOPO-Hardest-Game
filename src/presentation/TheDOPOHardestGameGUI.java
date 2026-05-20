@@ -67,8 +67,11 @@ public class TheDOPOHardestGameGUI implements Runnable, KeyListener {
         contenedor.add(panelJuegoContainer, "juego");
 
         frame.setContentPane(contenedor);
-        frame.addKeyListener(this);
-        frame.setFocusable(true);
+        KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(e -> {
+            if (e.getID() == KeyEvent.KEY_PRESSED)   keyPressed(e);
+            else if (e.getID() == KeyEvent.KEY_RELEASED) keyReleased(e);
+            return false;
+        });
         frame.pack();
         frame.setLocationRelativeTo(null);
         frame.setResizable(false);
@@ -81,7 +84,6 @@ public class TheDOPOHardestGameGUI implements Runnable, KeyListener {
         menu.mostrarPrincipal();
         layoutRaiz.show(contenedor, "menu");
         frame.setVisible(true);
-        frame.requestFocusInWindow();
     }
 
     private void iniciarJuegoConfigurado(SeleccionMenu sel) {
@@ -95,7 +97,6 @@ public class TheDOPOHardestGameGUI implements Runnable, KeyListener {
         ajustarLienzoYInputs();
 
         layoutRaiz.show(contenedor, "juego");
-        frame.requestFocusInWindow();
         arrancarLoopSiNecesario();
     }
 
@@ -174,7 +175,6 @@ public class TheDOPOHardestGameGUI implements Runnable, KeyListener {
             }
             juego.avanzarNivel();
             ajustarLienzoYInputs();
-            frame.requestFocusInWindow();
             avanceProgramado = false;
         });
         t.setRepeats(false);
@@ -205,7 +205,6 @@ public class TheDOPOHardestGameGUI implements Runnable, KeyListener {
         juego.terminar();
         layoutRaiz.show(contenedor, "menu");
         menu.mostrarPrincipal();
-        frame.requestFocusInWindow();
     }
 
     // ── Teclado ──────────────────────────────────────────────────────────────
