@@ -19,6 +19,7 @@ public class Nivel {
     private int monedasPendientes;
     private boolean checkpointGuardado            = false;
     private int     monedasPendientesEnCheckpoint = 0;
+    private int     ganadorIndex                  = -1;
 
     private List<Jugador>      jugadores = new ArrayList<>();
     private List<Enemigo>      enemigos  = new ArrayList<>();
@@ -55,6 +56,22 @@ public class Nivel {
         for (Moneda m : monedas) m.reiniciar();
         monedasPendientes = checkpointGuardado ? monedasPendientesEnCheckpoint : monedasTotales;
     }
+
+    /** Solo reinicia las monedas que recogió ese jugador (modo multijugador). */
+    public void reiniciarMonedasDeJugador(int jugadorIndex) {
+        for (Moneda m : monedas) m.reiniciarDeJugador(jugadorIndex);
+        monedasPendientes = 0;
+        for (Moneda m : monedas) if (!m.estaRecolectada()) monedasPendientes++;
+    }
+
+    public int obtenerMonedasDeJugador(int jugadorIndex) {
+        int c = 0;
+        for (Moneda m : monedas) if (m.estaRecolectada() && m.getColectorIndex() == jugadorIndex) c++;
+        return c;
+    }
+
+    public void registrarGanador(int idx) { ganadorIndex = idx; }
+    public int  obtenerGanadorIndex()     { return ganadorIndex; }
 
     public void agregarJugador(Jugador j)        { jugadores.add(j); }
     public void agregarEnemigo(Enemigo e)        { enemigos.add(e); }

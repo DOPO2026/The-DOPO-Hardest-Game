@@ -196,9 +196,21 @@ public class TheDOPOHardestGameGUI implements Runnable, KeyListener {
                 nivel.obtenerMonedasTotales());
     }
 
-    public void mostrarPausa()                  { panelControl.mostrarMensaje("PAUSADO  —  ESC para continuar"); }
-    public void mostrarVictoria(double tiempo)  { panelControl.mostrarMensaje(String.format("¡VICTORIA!  T: %.0fs  |  cargando siguiente nivel...", tiempo)); }
-    public void mostrarDerrota()                { panelControl.mostrarMensaje("¡TIEMPO AGOTADO!  |  R reinicia  |  M menú"); }
+    public void mostrarPausa() { panelControl.mostrarMensaje("PAUSADO  —  ESC para continuar"); }
+
+    public void mostrarVictoria(double tiempo) {
+        String ganador = juego.obtenerMensajeGanador();
+        String msg = ganador.isEmpty()
+                ? String.format("¡VICTORIA!  T: %.0fs  |  cargando siguiente nivel...", tiempo)
+                : String.format("¡VICTORIA!  %s  |  T: %.0fs  |  cargando...", ganador, tiempo);
+        panelControl.mostrarMensaje(msg);
+    }
+
+    public void mostrarDerrota() {
+        String ganador = juego.obtenerMensajeGanador();
+        String base = "¡TIEMPO AGOTADO!  |  R reinicia  |  M menú";
+        panelControl.mostrarMensaje(ganador.isEmpty() ? base : ganador + "  |  " + base);
+    }
 
     public void reiniciarNivel() { juego.reiniciar(); ajustarLienzoYInputs(); }
     public void volverAlMenu() {

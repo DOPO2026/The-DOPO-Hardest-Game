@@ -144,6 +144,23 @@ public class TheDOPOHardestGame {
 
     public void terminar() { estado = EstadoJuego.MENU; }
 
+    public String obtenerMensajeGanador() {
+        if (nivelActual == null || modo == ModoJuego.PLAYER) return "";
+        List<Jugador> jugadores = nivelActual.getJugadores();
+        if (jugadores.size() < 2) return "";
+        int ganador = nivelActual.obtenerGanadorIndex();
+        int c0 = nivelActual.obtenerMonedasDeJugador(0);
+        int c1 = nivelActual.obtenerMonedasDeJugador(1);
+        String marcador = String.format("J1: %d  J2: %d", c0, c1);
+        if (ganador >= 0) return String.format("J%d GANA  |  %s", ganador + 1, marcador);
+        if (c0 > c1)      return "J1 GANA (más monedas)  |  " + marcador;
+        if (c1 > c0)      return "J2 GANA (más monedas)  |  " + marcador;
+        int d0 = jugadores.get(0).obtenerMuertes(), d1 = jugadores.get(1).obtenerMuertes();
+        if (d0 < d1)      return "J1 GANA (menos muertes)  |  " + marcador;
+        if (d1 < d0)      return "J2 GANA (menos muertes)  |  " + marcador;
+        return "EMPATE  |  " + marcador;
+    }
+
     public String obtenerNivelId()       { return nivelActual == null ? "?" : nivelActual.obtenerId(); }
     public double obtenerTiempoRestante() {
         if (nivelActual == null) return 0;

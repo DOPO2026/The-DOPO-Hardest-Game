@@ -17,12 +17,18 @@ public class MotorJuego {
 
     public void procesarInteracciones(Nivel nivel) {
         List<Jugador> jugadores = nivel.getJugadores();
+        boolean multi = jugadores.size() > 1;
 
-        for (Jugador j : jugadores) {
+        for (int i = 0; i < jugadores.size(); i++) {
+            Jugador j = jugadores.get(i);
+
             // Enemigo
             for (Enemigo e : nivel.getEnemigos()) {
                 if (e.estaActivo() && j.getHitBox().intersecta(e.getHitBox())) {
-                    if (j.recibirGolpe()) nivel.reiniciarMonedas();
+                    if (j.recibirGolpe()) {
+                        if (multi) nivel.reiniciarMonedasDeJugador(i);
+                        else       nivel.reiniciarMonedas();
+                    }
                     break;
                 }
             }
@@ -30,7 +36,7 @@ public class MotorJuego {
             // Moneda
             for (Moneda m : nivel.getMonedas()) {
                 if (!m.estaRecolectada() && j.getHitBox().intersecta(m.getHitBox())) {
-                    m.recolectar();
+                    m.recolectarPor(i);
                     nivel.registrarRecoleccion();
                     if (m instanceof MonedaSkin ms) {
                         j.aplicarSkin(ms.obtenerSkinOtorgada());
@@ -52,7 +58,8 @@ public class MotorJuego {
                 if (b.estaActivo() && j.getHitBox().intersecta(b.getHitBox())) {
                     b.explotar(j);
                     j.morir();
-                    nivel.reiniciarMonedas();
+                    if (multi) nivel.reiniciarMonedasDeJugador(i);
+                    else       nivel.reiniciarMonedas();
                 }
             }
 
@@ -66,7 +73,7 @@ public class MotorJuego {
             }
         }
 
-        // Colisión jugador↔jugador (PvsP / PvsM): cuenta muerte para ambos.
+        // Colisión jugador↔jugador: cada uno pierde solo sus monedas.
         for (int i = 0; i < jugadores.size(); i++) {
             for (int k = i + 1; k < jugadores.size(); k++) {
                 Jugador a = jugadores.get(i);
@@ -74,14 +81,15 @@ public class MotorJuego {
                 if (a.getHitBox().intersecta(b.getHitBox())) {
                     a.morir();
                     b.morir();
-                    nivel.reiniciarMonedas();
+                    nivel.reiniciarMonedasDeJugador(i);
+                    nivel.reiniciarMonedasDeJugador(k);
                 }
             }
         }
     }
 
     /** Retorna true si algún jugador alcanzó su zona destino con todas las monedas recolectadas.
-     *  Jugador 0 → ZonaFinal. Jugador 1+ → ZonaInicial. */
+     *  Jugador 0 → ZonaFinal. Jugador 1+ → ZonaInicial. Registra el ganador en el nivel. */
     public boolean evaluarEstado(Nivel nivel) {
         if (!nivel.estaCompleto()) return false;
         List<Jugador> jugadores = nivel.getJugadores();
@@ -89,7 +97,10 @@ public class MotorJuego {
             Jugador j = jugadores.get(i);
             for (Zona z : nivel.getZonas()) {
                 boolean esDestino = (i == 0) ? z instanceof ZonaFinal : z instanceof ZonaInicial;
-                if (esDestino && z.contiene(j.obtenerPosX(), j.obtenerPosY())) return true;
+                if (esDestino && z.contiene(j.obtenerPosX(), j.obtenerPosY())) {
+                    nivel.registrarGanador(i);
+                    return true;
+                }
             }
         }
         return false;
