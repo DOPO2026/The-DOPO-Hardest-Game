@@ -37,6 +37,7 @@ public class MenuManager extends JPanel {
 
         cards.add(crearPanelPrincipal(),  "principal");
         cards.add(crearPanelModo(),       "modo");
+        cards.add(crearPanelMaquina(),    "maquina");
         cards.add(crearPanelPersonaje(),  "personaje");
         cards.add(crearPanelColor(),      "color");
         cards.add(crearPanelNivel(),      "nivel");
@@ -94,6 +95,31 @@ public class MenuManager extends JPanel {
     private void elegirModo(ModoJuego modo) {
         seleccion.modo = modo;
         jugadorActual = 0;
+        if (modo == ModoJuego.PvsM) {
+            layout.show(cards, "maquina");
+        } else {
+            actualizarPanelPersonaje();
+            layout.show(cards, "personaje");
+        }
+    }
+
+    // ── Pantalla 2b: Tipo de máquina (solo PvsM) ─────────────────────────────
+    private JPanel crearPanelMaquina() {
+        JPanel p = panelBase();
+        p.add(titulo("TIPO DE MÁQUINA"));
+        p.add(Box.createVerticalStrut(20));
+        p.add(subtitulo("Elige el perfil de la IA adversaria"));
+        p.add(Box.createVerticalStrut(40));
+        p.add(botonDescriptivo("ALEATORIA", "Se mueve sin estrategia fija",       () -> elegirMaquina(false)));
+        p.add(Box.createVerticalStrut(15));
+        p.add(botonDescriptivo("EXPERTA",   "Navega con estrategia óptima (BFS)", () -> elegirMaquina(true)));
+        p.add(Box.createVerticalStrut(30));
+        p.add(botonSecundario("← Atrás", () -> layout.show(cards, "modo")));
+        return p;
+    }
+
+    private void elegirMaquina(boolean experta) {
+        seleccion.maquinaExperta = experta;
         actualizarPanelPersonaje();
         layout.show(cards, "personaje");
     }

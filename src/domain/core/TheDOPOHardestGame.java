@@ -5,6 +5,7 @@ import domain.player.ControlHumano;
 import domain.player.ControlJugador;
 import domain.player.Jugador;
 import domain.ai.MaquinaAleatoria;
+import domain.ai.MaquinaExperta;
 import domain.skins.Blinky;
 import domain.skins.Clyde;
 import domain.skins.ColorJuego;
@@ -28,6 +29,7 @@ public class TheDOPOHardestGame {
     private String rutaNivelActual;
     private List<Skin> skinsConfiguradas;
     private List<ColorJuego> coloresConfigurados;
+    private boolean maquinaExperta;
 
     public TheDOPOHardestGame() {
         motor               = new MotorJuego();
@@ -43,7 +45,8 @@ public class TheDOPOHardestGame {
      * de acuerdo al modo: PLAYER (1 humano), PvsP (2 humanos), PvsM (1 humano + 1 IA).
      */
     public void iniciar(ModoJuego modo, String rutaNivel,
-                        List<Skin> skins, List<ColorJuego> coloresBorde) {
+                        List<Skin> skins, List<ColorJuego> coloresBorde,
+                        boolean maquinaExperta) {
         if (modo == null)        throw TheDopoHardestGameException.modoNoEspecificado();
         if (skins == null || skins.isEmpty()) {
             throw TheDopoHardestGameException.skinRequerida();
@@ -52,6 +55,7 @@ public class TheDOPOHardestGame {
         this.rutaNivelActual     = rutaNivel;
         this.skinsConfiguradas   = new ArrayList<>(skins);
         this.coloresConfigurados = new ArrayList<>(coloresBorde);
+        this.maquinaExperta      = maquinaExperta;
         tiempoTranscurrido       = 0;
 
         nivelActual = new ConstructorNivel().construirDesdeArchivo(rutaNivel);
@@ -98,7 +102,7 @@ public class TheDOPOHardestGame {
 
             ControlJugador control;
             if (modo == ModoJuego.PvsM && i == 1) {
-                control = new MaquinaAleatoria();
+                control = maquinaExperta ? new MaquinaExperta() : new MaquinaAleatoria();
             } else {
                 ControlHumano humano = new ControlHumano();
                 controles.add(humano);
@@ -127,16 +131,14 @@ public class TheDOPOHardestGame {
     public void reanudar() { if (estado == EstadoJuego.PAUSADO)  estado = EstadoJuego.JUGANDO;  }
 
     public void reiniciar() {
-        if (rutaNivelActual != null) {
-            iniciar(modo, rutaNivelActual, skinsConfiguradas, coloresConfigurados);
-        }
+        if (rutaNivelActual != null)
+            iniciar(modo, rutaNivelActual, skinsConfiguradas, coloresConfigurados, maquinaExperta);
     }
 
     /** Carga el siguiente nivel en la rotación; tras el último vuelve al primero. */
     public void avanzarNivel() {
-        if (rutaNivelActual != null) {
-            iniciar(modo, siguienteRuta(rutaNivelActual), skinsConfiguradas, coloresConfigurados);
-        }
+        if (rutaNivelActual != null)
+            iniciar(modo, siguienteRuta(rutaNivelActual), skinsConfiguradas, coloresConfigurados, maquinaExperta);
     }
 
     private static String siguienteRuta(String ruta) {
@@ -158,6 +160,7 @@ public class TheDOPOHardestGame {
                 pw.println("MODO=" + modo.name());
                 pw.println("NIVEL=" + rutaNivelActual);
                 pw.println("TIEMPO=" + tiempoTranscurrido);
+                pw.println("MAQUINA_EXPERTA=" + maquinaExperta);
                 List<Jugador> jugadores = nivelActual.getJugadores();
                 pw.println("JUGADORES=" + jugadores.size());
                 for (int i = 0; i < jugadores.size(); i++) {
@@ -188,9 +191,10 @@ public class TheDOPOHardestGame {
                 int idx = l.indexOf('=');
                 p.setProperty(l.substring(0, idx).trim(), l.substring(idx + 1).trim());
             });
-            ModoJuego modoGuardado = ModoJuego.valueOf(p.getProperty("MODO", "PLAYER"));
-            String nivelGuardado   = p.getProperty("NIVEL");
-            double tiempoGuardado  = Double.parseDouble(p.getProperty("TIEMPO", "0"));
+            ModoJuego modoGuardado    = ModoJuego.valueOf(p.getProperty("MODO", "PLAYER"));
+            String nivelGuardado      = p.getProperty("NIVEL");
+            double tiempoGuardado     = Double.parseDouble(p.getProperty("TIEMPO", "0"));
+            boolean expertoGuardado   = "true".equalsIgnoreCase(p.getProperty("MAQUINA_EXPERTA", "false"));
             int nJugadores = Integer.parseInt(p.getProperty("JUGADORES", "1"));
             List<Skin> skins   = new ArrayList<>();
             List<ColorJuego> colores = new ArrayList<>();
@@ -198,7 +202,7 @@ public class TheDOPOHardestGame {
                 skins.add(crearSkin(p.getProperty("SKIN" + i, "Blinky")));
                 colores.add(ColorJuego.valueOf(p.getProperty("COLOR" + i, "NEGRO")));
             }
-            iniciar(modoGuardado, nivelGuardado, skins, colores);
+            iniciar(modoGuardado, nivelGuardado, skins, colores, expertoGuardado);
             tiempoTranscurrido = tiempoGuardado;
             // Restaurar monedas
             List<Moneda> monedas = nivelActual.getMonedas();

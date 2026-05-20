@@ -61,16 +61,36 @@ public class GamePanel extends JPanel {
         if (estado == EstadoJuego.VICTORIA || estado == EstadoJuego.DERROTA) {
             g.setColor(new Color(0, 0, 0, 150));
             g.fillRect(0, 0, getWidth(), getHeight());
+
+            Font fontGrande  = new Font("Arial", Font.BOLD, 52);
+            Font fontMediano = new Font("Arial", Font.BOLD, 34);
+            Font fontPequeno = new Font("Arial", Font.PLAIN, 16);
+            int cx = getWidth() / 2;
+
+            // Título principal
             g.setColor(estado == EstadoJuego.VICTORIA ? new Color(80, 255, 80) : new Color(255, 80, 80));
-            g.setFont(new Font("Arial", Font.BOLD, 52));
-            String msg = estado == EstadoJuego.VICTORIA ? "¡VICTORIA!" : "¡TIEMPO!";
-            g.drawString(msg, getWidth() / 2 - 100, getHeight() / 2);
-            g.setFont(new Font("Arial", Font.PLAIN, 16));
-            g.setColor(Color.WHITE);
+            g.setFont(fontGrande);
+            String titulo = estado == EstadoJuego.VICTORIA ? "¡VICTORIA!" : "¡TIEMPO AGOTADO!";
+            g.drawString(titulo, cx - g.getFontMetrics().stringWidth(titulo) / 2, getHeight() / 2 - 20);
+
+            // Ganador (solo en multijugador)
+            String ganador = juego.obtenerMensajeGanador();
+            int lineaGanador = getHeight() / 2 + 30;
+            if (!ganador.isEmpty()) {
+                String winText = ganador.split("\\|")[0].trim();
+                g.setFont(fontMediano);
+                g.setColor(Color.WHITE);
+                g.drawString(winText, cx - g.getFontMetrics().stringWidth(winText) / 2, lineaGanador);
+                lineaGanador += 38;
+            }
+
+            // Pista de teclas
+            g.setFont(fontPequeno);
+            g.setColor(new Color(200, 200, 200));
             String hint = estado == EstadoJuego.VICTORIA
                     ? "N: siguiente nivel  |  S: guardar  |  R: reiniciar  |  M: menú"
                     : "R: reiniciar  |  M: menú";
-            g.drawString(hint, getWidth() / 2 - g.getFontMetrics().stringWidth(hint) / 2, getHeight() / 2 + 40);
+            g.drawString(hint, cx - g.getFontMetrics().stringWidth(hint) / 2, lineaGanador);
         }
     }
 

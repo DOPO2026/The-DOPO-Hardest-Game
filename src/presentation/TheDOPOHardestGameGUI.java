@@ -93,7 +93,7 @@ public class TheDOPOHardestGameGUI implements Runnable, KeyListener {
             skins.add(sel.skinJ2 != null ? sel.skinJ2 : new Inky());
             colores.add(sel.colorJ2);
         }
-        juego.iniciar(sel.modo, sel.rutaNivel, skins, colores);
+        juego.iniciar(sel.modo, sel.rutaNivel, skins, colores, sel.maquinaExperta);
         ajustarLienzoYInputs();
         layoutRaiz.show(contenedor, "juego");
         arrancarLoopSiNecesario();
