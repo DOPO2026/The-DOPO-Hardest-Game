@@ -39,7 +39,8 @@ public class GamePanel extends JPanel {
         g.setColor(new Color(185, 185, 215));
         g.fillRect(0, 0, getWidth(), getHeight());
 
-        for (Zona z          : nivel.getZonas())    render.dibujarZonaSegura(g, z, escala);
+        boolean multi = juego.getModo() != domain.core.ModoJuego.PLAYER;
+        for (Zona z          : nivel.getZonas())    render.dibujarZonaSegura(g, z, escala, multi);
         for (Pared p         : nivel.getParedes())  render.dibujarPared(g, p, escala);
         for (FuenteDeVida f  : nivel.getFuentes())  render.dibujarFuente(g, f, escala);
         for (Bomba b         : nivel.getBombas())   render.dibujarBomba(g, b, escala);

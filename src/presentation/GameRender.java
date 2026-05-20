@@ -84,30 +84,35 @@ public class GameRender {
         g.drawRect(x, y, w, h);
     }
 
-    public void dibujarZonaSegura(Graphics g, Zona z, int escala) {
+    public void dibujarZonaSegura(Graphics g, Zona z, int escala, boolean multijugador) {
         int x = z.obtenerPosX() * escala, y = z.obtenerPosY() * escala;
         int w = z.obtenerAncho() * escala, h = z.obtenerAlto() * escala;
         Color relleno, borde;
-        String etiqueta;
+        String linea1, linea2;
         if (z instanceof ZonaFinal) {
             relleno = new Color(60, 200, 60, 90);
             borde   = new Color(40, 160, 40);
-            etiqueta = "META";
+            linea1  = multijugador ? "META J1" : "META";
+            linea2  = multijugador ? "INICIO J2" : null;
         } else if (z instanceof ZonaIntermedia) {
             relleno = new Color(255, 215, 0, 90);
             borde   = new Color(190, 160, 0);
-            etiqueta = "CHECK";
+            linea1  = "CHECK";
+            linea2  = null;
         } else {
             relleno = new Color(60, 200, 60, 90);
             borde   = new Color(40, 160, 40);
-            etiqueta = "INICIO";
+            linea1  = multijugador ? "INICIO J1" : "INICIO";
+            linea2  = multijugador ? "META J2" : null;
         }
         g.setColor(relleno);
         g.fillRect(x, y, w, h);
         g.setColor(borde);
         g.drawRect(x, y, w, h);
         g.setFont(new Font("Monospaced", Font.BOLD, 11));
-        g.drawString(etiqueta, x + 5, y + 14);
+        g.setColor(borde);
+        g.drawString(linea1, x + 5, y + 14);
+        if (linea2 != null) g.drawString(linea2, x + 5, y + 27);
     }
 
     public void dibujarTodosJugadores(Graphics g, List<Jugador> jugadores, int escala) {
