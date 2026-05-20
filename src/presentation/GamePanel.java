@@ -65,9 +65,12 @@ public class GamePanel extends JPanel {
             g.setFont(new Font("Arial", Font.BOLD, 52));
             String msg = estado == EstadoJuego.VICTORIA ? "¡VICTORIA!" : "¡TIEMPO!";
             g.drawString(msg, getWidth() / 2 - 100, getHeight() / 2);
-            g.setFont(new Font("Arial", Font.PLAIN, 18));
+            g.setFont(new Font("Arial", Font.PLAIN, 16));
             g.setColor(Color.WHITE);
-            g.drawString("R: reiniciar  |  M: menú", getWidth() / 2 - 110, getHeight() / 2 + 35);
+            String hint = estado == EstadoJuego.VICTORIA
+                    ? "N: siguiente nivel  |  S: guardar  |  R: reiniciar  |  M: menú"
+                    : "R: reiniciar  |  M: menú";
+            g.drawString(hint, getWidth() / 2 - g.getFontMetrics().stringWidth(hint) / 2, getHeight() / 2 + 40);
         }
     }
 

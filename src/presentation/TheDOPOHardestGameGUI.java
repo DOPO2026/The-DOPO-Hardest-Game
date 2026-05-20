@@ -232,11 +232,15 @@ public class TheDOPOHardestGameGUI implements Runnable, KeyListener {
             volverAlMenu();
         } else if (code == KeyEvent.VK_Q) {
             System.exit(0);
-        } else if (code == KeyEvent.VK_S && estado == EstadoJuego.PAUSADO) {
+        } else if (code == KeyEvent.VK_S
+                && (estado == EstadoJuego.PAUSADO || estado == EstadoJuego.VICTORIA)) {
             try {
                 juego.guardarPartida(RUTA_GUARDADO);
                 menu.marcarPartidaGuardada(true);
-                panelControl.mostrarMensaje("Partida guardada  |  ESC: continuar  |  Q: salir");
+                if (estado == EstadoJuego.PAUSADO)
+                    panelControl.mostrarMensaje("Partida guardada  |  ESC: continuar  |  Q: salir");
+                else
+                    panelControl.mostrarMensaje("Progreso guardado  |  N: siguiente  |  M: menú");
             } catch (Exception ex) {
                 panelControl.mostrarMensaje("Error al guardar: " + ex.getMessage());
             }
