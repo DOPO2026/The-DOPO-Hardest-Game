@@ -186,7 +186,7 @@ public class TheDOPOHardestGameGUI implements Runnable, KeyListener {
     }
 
     public void mostrarPausa() {
-        panelControl.mostrarMensaje("PAUSADO  |  ESC: continuar  |  S: guardar  |  M: menú");
+        panelControl.mostrarMensaje("PAUSADO  |  ESC: continuar  |  S: guardar  |  M: menú  |  Q: salir");
     }
 
     public void mostrarVictoria(double tiempo) {
@@ -230,6 +230,8 @@ public class TheDOPOHardestGameGUI implements Runnable, KeyListener {
             siguienteNivel();
         } else if (code == KeyEvent.VK_M && estado != EstadoJuego.MENU) {
             volverAlMenu();
+        } else if (code == KeyEvent.VK_Q) {
+            System.exit(0);
         } else if (code == KeyEvent.VK_S
                 && (estado == EstadoJuego.JUGANDO || estado == EstadoJuego.PAUSADO)) {
             try {
