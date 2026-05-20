@@ -31,6 +31,10 @@ public class Enemigo extends Elemento {
 
     public void desactivar() { activo = false; }
 
+    public String obtenerTipoEstrategia() {
+        return estrategia != null ? estrategia.obtenerTipo() : "ESTANDAR";
+    }
+
     @Override
     public boolean estaActivo() { return activo; }
 }

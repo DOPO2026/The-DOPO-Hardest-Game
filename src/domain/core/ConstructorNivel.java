@@ -9,6 +9,7 @@ import domain.enemy.Basico;
 import domain.enemy.DeslizadorVertical;
 import domain.enemy.Enemigo;
 import domain.enemy.EstrategiaMovimiento;
+import domain.enemy.Patrullero;
 import domain.skins.Blinky;
 import domain.skins.Clyde;
 import domain.skins.Inky;
@@ -122,6 +123,9 @@ public class ConstructorNivel {
                     Integer.parseInt(t[8]), Integer.parseInt(t[9]));
             case "DESLIZADORV" -> new DeslizadorVertical(
                     Integer.parseInt(t[4]), Integer.parseInt(t[5]), 3);
+            case "PATRULLERO"  -> new Patrullero(
+                    Integer.parseInt(t[4]), Integer.parseInt(t[5]),
+                    Integer.parseInt(t[6]), Integer.parseInt(t[7]), 2);
             default            -> throw TheDopoHardestGameException.tipoEnemigoDesconocido(tipo);
         };
         nivel.agregarEnemigo(new Enemigo(x, y, TAM_ENEMIGO, TAM_ENEMIGO, estrategia));

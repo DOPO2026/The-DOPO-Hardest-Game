@@ -44,7 +44,8 @@ class EstrategiaMovimientoTest {
 
     @Test
     void deberiaActualizarSinEfecto() {
-        Enemigo e = new Enemigo(100, 100, 20, 20, new Patrullero());
-        assertDoesNotThrow(() -> new Patrullero().actualizar(e, nivel(), 0.016));
+        Patrullero pat = new Patrullero(80, 80, 200, 200, 2);
+        Enemigo e = new Enemigo(100, 100, 20, 20, pat);
+        assertDoesNotThrow(() -> pat.actualizar(e, nivel(), 0.016));
     }
 }

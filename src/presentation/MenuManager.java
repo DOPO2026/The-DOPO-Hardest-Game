@@ -8,6 +8,8 @@ import domain.skins.Inky;
 import domain.skins.Skin;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.function.Consumer;
 
 /**
@@ -327,12 +329,18 @@ public class MenuManager extends JPanel {
     }
 
     private JPanel botonDescriptivo(String titulo, String descripcion, Runnable accion) {
+        Color bgNormal  = new Color(36, 36, 56);
+        Color bgHover   = new Color(55, 55, 85);
+        Color borderNormal = new Color(70, 70, 100);
+        Color borderHover  = new Color(100, 130, 220);
+
         JPanel p = new JPanel(new BorderLayout(12, 0));
-        p.setBackground(new Color(36, 36, 56));
-        p.setBorder(BorderFactory.createLineBorder(new Color(70, 70, 100), 1));
+        p.setBackground(bgNormal);
+        p.setBorder(BorderFactory.createLineBorder(borderNormal, 1));
         p.setMaximumSize(new Dimension(520, 70));
         p.setPreferredSize(new Dimension(520, 70));
         p.setAlignmentX(CENTER_ALIGNMENT);
+        p.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         JLabel t = new JLabel(titulo);
         t.setFont(new Font("Arial", Font.BOLD, 18));
@@ -349,16 +357,25 @@ public class MenuManager extends JPanel {
         txt.add(t);
         txt.add(d);
 
-        JButton ir = new JButton("▶");
-        ir.setFont(new Font("Arial", Font.BOLD, 22));
-        ir.setForeground(Color.WHITE);
-        ir.setBackground(new Color(60, 100, 180));
-        ir.setFocusPainted(false);
-        ir.setPreferredSize(new Dimension(70, 70));
-        ir.addActionListener(ev -> accion.run());
+        JLabel flecha = new JLabel("  >");
+        flecha.setFont(new Font("Arial", Font.BOLD, 26));
+        flecha.setForeground(new Color(130, 160, 240));
+        flecha.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 18));
 
-        p.add(txt, BorderLayout.CENTER);
-        p.add(ir,  BorderLayout.EAST);
+        p.add(txt,    BorderLayout.CENTER);
+        p.add(flecha, BorderLayout.EAST);
+
+        p.addMouseListener(new MouseAdapter() {
+            @Override public void mouseClicked(MouseEvent e)  { accion.run(); }
+            @Override public void mouseEntered(MouseEvent e)  {
+                p.setBackground(bgHover);
+                p.setBorder(BorderFactory.createLineBorder(borderHover, 2));
+            }
+            @Override public void mouseExited(MouseEvent e) {
+                p.setBackground(bgNormal);
+                p.setBorder(BorderFactory.createLineBorder(borderNormal, 1));
+            }
+        });
         return p;
     }
 

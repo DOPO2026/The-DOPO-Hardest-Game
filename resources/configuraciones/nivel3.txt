@@ -21,6 +21,10 @@ ENEMIGO;ACELERADO;620;215;-1;0;145;655;130;265
 ENEMIGO;ACELERADO;160;390;1;0;145;655;295;430
 ENEMIGO;BASICO;620;320;-4;0;145;655;295;430
 ENEMIGO;BASICO;380;395;-4;0;145;655;295;430
+# Patrullero: patrulla el pasillo inferior central
+ENEMIGO;PATRULLERO;280;320;230;300;530;420
+# Deslizador vertical entre los dos pasillos (zona central)
+ENEMIGO;DESLIZADORV;400;150;135;255
 
 # Monedas (4 en pasillo superior, 4 en pasillo inferior)
 MONEDA;AMARILLA;230;190

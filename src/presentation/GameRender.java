@@ -35,9 +35,10 @@ public class GameRender {
     public void dibujarEnemigo(Graphics g, Enemigo e, int escala) {
         int x = e.obtenerPosX() * escala, y = e.obtenerPosY() * escala;
         int w = e.obtenerAncho() * escala, h = e.obtenerAlto() * escala;
-        g.setColor(new Color(40, 80, 220));
+        boolean esPatrullero = "PATRULLERO".equals(e.obtenerTipoEstrategia());
+        g.setColor(esPatrullero ? new Color(40, 80, 220) : new Color(220, 60, 60));
         g.fillOval(x, y, w, h);
-        g.setColor(new Color(20, 40, 140));
+        g.setColor(esPatrullero ? new Color(20, 40, 140) : new Color(150, 20, 20));
         g.drawOval(x, y, w, h);
     }
 
@@ -95,8 +96,8 @@ public class GameRender {
             linea1  = multijugador ? "META J1" : "META";
             linea2  = multijugador ? "INICIO J2" : null;
         } else if (z instanceof ZonaIntermedia) {
-            relleno = new Color(255, 215, 0, 90);
-            borde   = new Color(190, 160, 0);
+            relleno = new Color(120, 240, 60, 90);
+            borde   = new Color(70, 185, 30);
             linea1  = "CHECK";
             linea2  = null;
         } else {
