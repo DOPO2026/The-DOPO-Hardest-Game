@@ -17,6 +17,8 @@ public class Nivel {
     private double tiempoLimite;
     private int monedasTotales;
     private int monedasPendientes;
+    private boolean checkpointGuardado            = false;
+    private int     monedasPendientesEnCheckpoint = 0;
 
     private List<Jugador>      jugadores = new ArrayList<>();
     private List<Enemigo>      enemigos  = new ArrayList<>();
@@ -41,10 +43,17 @@ public class Nivel {
         reiniciarMonedas();
     }
 
-    /** Devuelve todas las monedas a su estado inicial (no recolectadas). */
+    /** Guarda el progreso actual como punto de restauración al morir. */
+    public void guardarEstadoCheckpoint() {
+        for (Moneda m : monedas) m.guardarEnCheckpoint();
+        monedasPendientesEnCheckpoint = monedasPendientes;
+        checkpointGuardado = true;
+    }
+
+    /** Restaura solo las monedas recogidas después del último checkpoint. */
     public void reiniciarMonedas() {
         for (Moneda m : monedas) m.reiniciar();
-        monedasPendientes = monedasTotales;
+        monedasPendientes = checkpointGuardado ? monedasPendientesEnCheckpoint : monedasTotales;
     }
 
     public void agregarJugador(Jugador j)        { jugadores.add(j); }

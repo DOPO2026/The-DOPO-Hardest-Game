@@ -60,6 +60,7 @@ public class MotorJuego {
                 if (z instanceof ZonaIntermedia zi
                         && z.contiene(j.obtenerPosX(), j.obtenerPosY())) {
                     zi.activarCheckpoint(j);
+                    nivel.guardarEstadoCheckpoint();
                 }
             }
         }
