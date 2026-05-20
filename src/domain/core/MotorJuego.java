@@ -8,6 +8,7 @@ import domain.enemy.Enemigo;
 import domain.player.Jugador;
 import domain.world.Zona;
 import domain.world.ZonaFinal;
+import domain.world.ZonaInicial;
 import domain.world.ZonaIntermedia;
 
 import java.util.List;
@@ -79,14 +80,16 @@ public class MotorJuego {
         }
     }
 
-    /** Retorna true si algún jugador alcanzó la ZonaFinal con todas las monedas recolectadas. */
+    /** Retorna true si algún jugador alcanzó su zona destino con todas las monedas recolectadas.
+     *  Jugador 0 → ZonaFinal. Jugador 1+ → ZonaInicial. */
     public boolean evaluarEstado(Nivel nivel) {
         if (!nivel.estaCompleto()) return false;
-        for (Zona z : nivel.getZonas()) {
-            if (z instanceof ZonaFinal) {
-                for (Jugador j : nivel.getJugadores()) {
-                    if (z.contiene(j.obtenerPosX(), j.obtenerPosY())) return true;
-                }
+        List<Jugador> jugadores = nivel.getJugadores();
+        for (int i = 0; i < jugadores.size(); i++) {
+            Jugador j = jugadores.get(i);
+            for (Zona z : nivel.getZonas()) {
+                boolean esDestino = (i == 0) ? z instanceof ZonaFinal : z instanceof ZonaInicial;
+                if (esDestino && z.contiene(j.obtenerPosX(), j.obtenerPosY())) return true;
             }
         }
         return false;
