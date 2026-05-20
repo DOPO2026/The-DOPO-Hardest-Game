@@ -18,4 +18,7 @@ public class DeslizadorVertical implements EstrategiaMovimiento {
         if (enemigo.obtenerPosY() >= maxY) bajando = false;
         if (enemigo.obtenerPosY() <= minY) bajando = true;
     }
+
+    @Override
+    public String obtenerTipo() { return "DESLIZADORV"; }
 }

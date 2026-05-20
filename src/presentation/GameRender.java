@@ -35,10 +35,15 @@ public class GameRender {
     public void dibujarEnemigo(Graphics g, Enemigo e, int escala) {
         int x = e.obtenerPosX() * escala, y = e.obtenerPosY() * escala;
         int w = e.obtenerAncho() * escala, h = e.obtenerAlto() * escala;
-        boolean esPatrullero = "PATRULLERO".equals(e.obtenerTipoEstrategia());
-        g.setColor(esPatrullero ? new Color(40, 80, 220) : new Color(220, 60, 60));
+        Color fill, outline;
+        switch (e.obtenerTipoEstrategia()) {
+            case "ACELERADO"   -> { fill = new Color(140, 40, 200); outline = new Color(80, 0, 130);  }
+            case "DESLIZADORV" -> { fill = new Color(220, 60, 60);  outline = new Color(150, 20, 20); }
+            default            -> { fill = new Color(40, 80, 220);  outline = new Color(20, 40, 140); }
+        }
+        g.setColor(fill);
         g.fillOval(x, y, w, h);
-        g.setColor(esPatrullero ? new Color(20, 40, 140) : new Color(150, 20, 20));
+        g.setColor(outline);
         g.drawOval(x, y, w, h);
     }
 

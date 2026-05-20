@@ -3,34 +3,33 @@ package domain.enemy;
 import domain.core.Nivel;
 
 /**
- * Patrulla un rectángulo en sentido horario.
- * x1,y1 = esquina superior-izquierda  /  x2,y2 = esquina inferior-derecha
+ * Patrulla una elipse en sentido antihorario.
+ * x1,y1 = esquina sup-izq / x2,y2 = esquina inf-der del rectángulo que circunscribe la elipse.
  */
 public class Patrullero implements EstrategiaMovimiento {
 
-    private enum Lado { DERECHA, ABAJO, IZQUIERDA, ARRIBA }
+    private static final double VELOCIDAD_ANGULAR = Math.toRadians(2.0); // 2°/frame
 
-    private final int x1, y1, x2, y2, velocidad;
-    private Lado lado = Lado.DERECHA;
+    private final int cx, cy, rx, ry;
+    private double angulo;
 
     public Patrullero(int x1, int y1, int x2, int y2, int velocidad) {
-        this.x1 = x1;
-        this.y1 = y1;
-        this.x2 = x2;
-        this.y2 = y2;
-        this.velocidad = velocidad;
+        this.cx = (x1 + x2) / 2;
+        this.cy = (y1 + y2) / 2;
+        this.rx = Math.abs(x2 - x1) / 2;
+        this.ry = Math.abs(y2 - y1) / 2;
+        this.angulo = 0.0;
     }
 
     @Override
     public void actualizar(Enemigo enemigo, Nivel nivel, double deltaTime) {
-        int px = enemigo.obtenerPosX();
-        int py = enemigo.obtenerPosY();
-        switch (lado) {
-            case DERECHA   -> { enemigo.mover(velocidad,  0);          if (px >= x2) lado = Lado.ABAJO;     }
-            case ABAJO     -> { enemigo.mover(0,          velocidad);  if (py >= y2) lado = Lado.IZQUIERDA; }
-            case IZQUIERDA -> { enemigo.mover(-velocidad, 0);          if (px <= x1) lado = Lado.ARRIBA;    }
-            case ARRIBA    -> { enemigo.mover(0,          -velocidad); if (py <= y1) lado = Lado.DERECHA;   }
-        }
+        int halfW = enemigo.obtenerAncho() / 2;
+        int halfH = enemigo.obtenerAlto() / 2;
+        int targetX = (int)(cx + rx * Math.cos(angulo)) - halfW;
+        int targetY = (int)(cy + ry * Math.sin(angulo)) - halfH;
+        enemigo.mover(targetX - enemigo.obtenerPosX(), targetY - enemigo.obtenerPosY());
+        angulo += VELOCIDAD_ANGULAR;
+        if (angulo >= 2 * Math.PI) angulo -= 2 * Math.PI;
     }
 
     @Override
