@@ -1,13 +1,13 @@
 package test;
 
-import domain.Direction;
+import domain.player.Direction;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 class DirectionTest {
 
     @Test
-    void cardinalesTienenComponenteUnico() {
+    void deberiaTenerUnSoloComponenteParaCadaCardinal() {
         assertArrayEquals(new int[]{ 0, -1}, new int[]{Direction.NORTE.dx, Direction.NORTE.dy});
         assertArrayEquals(new int[]{ 0,  1}, new int[]{Direction.SUR.dx,   Direction.SUR.dy});
         assertArrayEquals(new int[]{ 1,  0}, new int[]{Direction.ESTE.dx,  Direction.ESTE.dy});
@@ -15,7 +15,7 @@ class DirectionTest {
     }
 
     @Test
-    void diagonalesCombinanDosEjes() {
+    void deberiaCombinarDosEjesParaDiagonales() {
         assertEquals( 1, Direction.NORESTE.dx);
         assertEquals(-1, Direction.NORESTE.dy);
         assertEquals(-1, Direction.SUROESTE.dx);
@@ -23,13 +23,13 @@ class DirectionTest {
     }
 
     @Test
-    void quietoEsCero() {
+    void deberiaSerCeroEnAmbosEjes() {
         assertEquals(0, Direction.QUIETO.dx);
         assertEquals(0, Direction.QUIETO.dy);
     }
 
     @Test
-    void hayNueveValores() {
+    void deberiaTenerNueveValoresPosibles() {
         assertEquals(9, Direction.values().length);
     }
 }

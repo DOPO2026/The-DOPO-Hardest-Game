@@ -1,13 +1,13 @@
 package test;
 
-import domain.HitBox;
+import domain.common.HitBox;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 class HitBoxTest {
 
     @Test
-    void cajasSuperpuestasSeIntersectan() {
+    void deberiaIntersectarCuandoHaySuperposicion() {
         HitBox a = new HitBox(0, 0, 20, 20);
         HitBox b = new HitBox(10, 10, 20, 20);
         assertTrue(a.intersecta(b));
@@ -15,14 +15,14 @@ class HitBoxTest {
     }
 
     @Test
-    void cajasSeparadasNoSeIntersectan() {
+    void noDeberiaIntersectarCuandoEstanSeparadas() {
         HitBox a = new HitBox(0, 0, 20, 20);
         HitBox b = new HitBox(40, 40, 20, 20);
         assertFalse(a.intersecta(b));
     }
 
     @Test
-    void contactoEnBordeNoCuentaComoInterseccion() {
+    void noDeberiaContarContactoEnBordeComoInterseccion() {
         HitBox a = new HitBox(0, 0, 20, 20);
         HitBox b = new HitBox(20, 0, 20, 20);
         assertFalse(a.intersecta(b));

@@ -1,8 +1,15 @@
 package presentation;
 
-import domain.*;
+import domain.core.ModoJuego;
+import domain.skins.Blinky;
+import domain.skins.Clyde;
+import domain.skins.ColorJuego;
+import domain.skins.Inky;
+import domain.skins.Skin;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.function.Consumer;
 
 /**
@@ -16,11 +23,15 @@ public class MenuManager extends JPanel {
     private final JPanel cards      = new JPanel(layout);
     private final SeleccionMenu seleccion = new SeleccionMenu();
     private final Consumer<SeleccionMenu> alListo;
+    private final Runnable alCargar;
+    private boolean hayPartidaGuardada = false;
+    private JButton btnCargar;
 
     private int jugadorActual = 0; // 0 = J1, 1 = J2
 
-    public MenuManager(Consumer<SeleccionMenu> alListo) {
-        this.alListo = alListo;
+    public MenuManager(Consumer<SeleccionMenu> alListo, Runnable alCargar) {
+        this.alListo  = alListo;
+        this.alCargar = alCargar;
         setLayout(new BorderLayout());
         setBackground(new Color(18, 18, 28));
         cards.setOpaque(false);
@@ -28,6 +39,7 @@ public class MenuManager extends JPanel {
 
         cards.add(crearPanelPrincipal(),  "principal");
         cards.add(crearPanelModo(),       "modo");
+        cards.add(crearPanelMaquina(),    "maquina");
         cards.add(crearPanelPersonaje(),  "personaje");
         cards.add(crearPanelColor(),      "color");
         cards.add(crearPanelNivel(),      "nivel");
@@ -35,7 +47,16 @@ public class MenuManager extends JPanel {
         layout.show(cards, "principal");
     }
 
-    public void mostrarPrincipal() { layout.show(cards, "principal"); }
+    public void mostrarPrincipal() {
+        hayPartidaGuardada = new java.io.File("resources/saves/partida.txt").exists();
+        if (btnCargar != null) btnCargar.setVisible(hayPartidaGuardada);
+        layout.show(cards, "principal");
+    }
+
+    public void marcarPartidaGuardada(boolean existe) {
+        hayPartidaGuardada = existe;
+        if (btnCargar != null) btnCargar.setVisible(existe);
+    }
 
     // ── Pantalla 1: Principal ────────────────────────────────────────────────
     private JPanel crearPanelPrincipal() {
@@ -47,6 +68,11 @@ public class MenuManager extends JPanel {
         p.add(subtitulo("DOPO 2026-1"));
         p.add(Box.createVerticalStrut(60));
         p.add(boton("JUGAR",  () -> layout.show(cards, "modo")));
+        p.add(Box.createVerticalStrut(15));
+        btnCargar = boton("CARGAR PARTIDA", alCargar::run);
+        btnCargar.setBackground(new Color(40, 120, 80));
+        btnCargar.setVisible(new java.io.File("resources/saves/partida.txt").exists());
+        p.add(btnCargar);
         p.add(Box.createVerticalStrut(15));
         p.add(boton("SALIR",  () -> System.exit(0)));
         return p;
@@ -71,6 +97,31 @@ public class MenuManager extends JPanel {
     private void elegirModo(ModoJuego modo) {
         seleccion.modo = modo;
         jugadorActual = 0;
+        if (modo == ModoJuego.PvsM) {
+            layout.show(cards, "maquina");
+        } else {
+            actualizarPanelPersonaje();
+            layout.show(cards, "personaje");
+        }
+    }
+
+    // ── Pantalla 2b: Tipo de máquina (solo PvsM) ─────────────────────────────
+    private JPanel crearPanelMaquina() {
+        JPanel p = panelBase();
+        p.add(titulo("TIPO DE MÁQUINA"));
+        p.add(Box.createVerticalStrut(20));
+        p.add(subtitulo("Elige el perfil de la IA adversaria"));
+        p.add(Box.createVerticalStrut(40));
+        p.add(botonDescriptivo("ALEATORIA", "Se mueve sin estrategia fija",       () -> elegirMaquina(false)));
+        p.add(Box.createVerticalStrut(15));
+        p.add(botonDescriptivo("EXPERTA",   "Navega con estrategia óptima (BFS)", () -> elegirMaquina(true)));
+        p.add(Box.createVerticalStrut(30));
+        p.add(botonSecundario("← Atrás", () -> layout.show(cards, "modo")));
+        return p;
+    }
+
+    private void elegirMaquina(boolean experta) {
+        seleccion.maquinaExperta = experta;
         actualizarPanelPersonaje();
         layout.show(cards, "personaje");
     }
@@ -92,6 +143,8 @@ public class MenuManager extends JPanel {
         fila.add(tarjetaPersonaje(new Clyde(),  "Más vidas (escudo)"));
         fila.add(tarjetaPersonaje(new Inky(),   "Veloz pero grande"));
         panelPersonaje.add(fila);
+        panelPersonaje.add(Box.createVerticalStrut(30));
+        panelPersonaje.add(botonSecundario("← Atrás", this::retrocederDesdePersonaje));
         return panelPersonaje;
     }
 
@@ -150,6 +203,18 @@ public class MenuManager extends JPanel {
         return card;
     }
 
+    private void retrocederDesdePersonaje() {
+        if (jugadorActual == 1) {
+            jugadorActual = 0;
+            actualizarPanelColor();
+            layout.show(cards, "color");
+        } else if (seleccion.modo == ModoJuego.PvsM) {
+            layout.show(cards, "maquina");
+        } else {
+            layout.show(cards, "modo");
+        }
+    }
+
     private void elegirSkin(Skin skin) {
         if (jugadorActual == 0) seleccion.skinJ1 = skin;
         else                    seleccion.skinJ2 = skin;
@@ -173,6 +238,11 @@ public class MenuManager extends JPanel {
         grid.setMaximumSize(new Dimension(640, 200));
         for (ColorJuego c : ColorJuego.values()) grid.add(swatch(c));
         panelColor.add(grid);
+        panelColor.add(Box.createVerticalStrut(30));
+        panelColor.add(botonSecundario("← Atrás", () -> {
+            actualizarPanelPersonaje();
+            layout.show(cards, "personaje");
+        }));
         return panelColor;
     }
 
@@ -222,6 +292,11 @@ public class MenuManager extends JPanel {
             p.add(botonDescriptivo(n[0], n[1], () -> elegirNivel(n[2])));
             p.add(Box.createVerticalStrut(12));
         }
+        p.add(Box.createVerticalStrut(10));
+        p.add(botonSecundario("← Atrás", () -> {
+            actualizarPanelColor();
+            layout.show(cards, "color");
+        }));
         return p;
     }
 
@@ -278,12 +353,18 @@ public class MenuManager extends JPanel {
     }
 
     private JPanel botonDescriptivo(String titulo, String descripcion, Runnable accion) {
+        Color bgNormal  = new Color(36, 36, 56);
+        Color bgHover   = new Color(55, 55, 85);
+        Color borderNormal = new Color(70, 70, 100);
+        Color borderHover  = new Color(100, 130, 220);
+
         JPanel p = new JPanel(new BorderLayout(12, 0));
-        p.setBackground(new Color(36, 36, 56));
-        p.setBorder(BorderFactory.createLineBorder(new Color(70, 70, 100), 1));
+        p.setBackground(bgNormal);
+        p.setBorder(BorderFactory.createLineBorder(borderNormal, 1));
         p.setMaximumSize(new Dimension(520, 70));
         p.setPreferredSize(new Dimension(520, 70));
         p.setAlignmentX(CENTER_ALIGNMENT);
+        p.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         JLabel t = new JLabel(titulo);
         t.setFont(new Font("Arial", Font.BOLD, 18));
@@ -300,16 +381,25 @@ public class MenuManager extends JPanel {
         txt.add(t);
         txt.add(d);
 
-        JButton ir = new JButton("▶");
-        ir.setFont(new Font("Arial", Font.BOLD, 22));
-        ir.setForeground(Color.WHITE);
-        ir.setBackground(new Color(60, 100, 180));
-        ir.setFocusPainted(false);
-        ir.setPreferredSize(new Dimension(70, 70));
-        ir.addActionListener(ev -> accion.run());
+        JLabel flecha = new JLabel("  >");
+        flecha.setFont(new Font("Arial", Font.BOLD, 26));
+        flecha.setForeground(new Color(130, 160, 240));
+        flecha.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 18));
 
-        p.add(txt, BorderLayout.CENTER);
-        p.add(ir,  BorderLayout.EAST);
+        p.add(txt,    BorderLayout.CENTER);
+        p.add(flecha, BorderLayout.EAST);
+
+        p.addMouseListener(new MouseAdapter() {
+            @Override public void mouseClicked(MouseEvent e)  { accion.run(); }
+            @Override public void mouseEntered(MouseEvent e)  {
+                p.setBackground(bgHover);
+                p.setBorder(BorderFactory.createLineBorder(borderHover, 2));
+            }
+            @Override public void mouseExited(MouseEvent e) {
+                p.setBackground(bgNormal);
+                p.setBorder(BorderFactory.createLineBorder(borderNormal, 1));
+            }
+        });
         return p;
     }
 

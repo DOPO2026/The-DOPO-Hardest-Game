@@ -1,6 +1,16 @@
 package presentation;
 
-import domain.*;
+import domain.collectibles.Bomba;
+import domain.collectibles.FuenteDeVida;
+import domain.collectibles.Moneda;
+import domain.collectibles.MonedaSkin;
+import domain.enemy.Enemigo;
+import domain.player.Jugador;
+import domain.skins.ColorJuego;
+import domain.world.Pared;
+import domain.world.Zona;
+import domain.world.ZonaFinal;
+import domain.world.ZonaIntermedia;
 import java.awt.*;
 import java.util.List;
 
@@ -25,9 +35,15 @@ public class GameRender {
     public void dibujarEnemigo(Graphics g, Enemigo e, int escala) {
         int x = e.obtenerPosX() * escala, y = e.obtenerPosY() * escala;
         int w = e.obtenerAncho() * escala, h = e.obtenerAlto() * escala;
-        g.setColor(new Color(40, 80, 220));
+        Color fill, outline;
+        switch (e.obtenerTipoEstrategia()) {
+            case "ACELERADO"   -> { fill = new Color(140, 40, 200); outline = new Color(80, 0, 130);  }
+            case "DESLIZADORV" -> { fill = new Color(220, 60, 60);  outline = new Color(150, 20, 20); }
+            default            -> { fill = new Color(40, 80, 220);  outline = new Color(20, 40, 140); }
+        }
+        g.setColor(fill);
         g.fillOval(x, y, w, h);
-        g.setColor(new Color(20, 40, 140));
+        g.setColor(outline);
         g.drawOval(x, y, w, h);
     }
 
@@ -74,30 +90,35 @@ public class GameRender {
         g.drawRect(x, y, w, h);
     }
 
-    public void dibujarZonaSegura(Graphics g, Zona z, int escala) {
+    public void dibujarZonaSegura(Graphics g, Zona z, int escala, boolean multijugador) {
         int x = z.obtenerPosX() * escala, y = z.obtenerPosY() * escala;
         int w = z.obtenerAncho() * escala, h = z.obtenerAlto() * escala;
         Color relleno, borde;
-        String etiqueta;
+        String linea1, linea2;
         if (z instanceof ZonaFinal) {
             relleno = new Color(60, 200, 60, 90);
             borde   = new Color(40, 160, 40);
-            etiqueta = "META";
+            linea1  = multijugador ? "META J1" : "META";
+            linea2  = multijugador ? "INICIO J2" : null;
         } else if (z instanceof ZonaIntermedia) {
-            relleno = new Color(255, 215, 0, 90);
-            borde   = new Color(190, 160, 0);
-            etiqueta = "CHECK";
+            relleno = new Color(120, 240, 60, 90);
+            borde   = new Color(70, 185, 30);
+            linea1  = "CHECK";
+            linea2  = null;
         } else {
             relleno = new Color(60, 200, 60, 90);
             borde   = new Color(40, 160, 40);
-            etiqueta = "INICIO";
+            linea1  = multijugador ? "INICIO J1" : "INICIO";
+            linea2  = multijugador ? "META J2" : null;
         }
         g.setColor(relleno);
         g.fillRect(x, y, w, h);
         g.setColor(borde);
         g.drawRect(x, y, w, h);
         g.setFont(new Font("Monospaced", Font.BOLD, 11));
-        g.drawString(etiqueta, x + 5, y + 14);
+        g.setColor(borde);
+        g.drawString(linea1, x + 5, y + 14);
+        if (linea2 != null) g.drawString(linea2, x + 5, y + 27);
     }
 
     public void dibujarTodosJugadores(Graphics g, List<Jugador> jugadores, int escala) {

@@ -1,13 +1,18 @@
 package test;
 
-import domain.*;
+import domain.core.ConstructorNivel;
+import domain.core.TheDopoHardestGameException;
+import domain.core.Nivel;
+import domain.world.ZonaFinal;
+import domain.world.ZonaInicial;
+import domain.world.ZonaIntermedia;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ConstructorNivelTest {
 
     @Test
-    void cargaNivel1Correctamente() {
+    void deberiaCargarNivel1Correctamente() {
         Nivel n = new ConstructorNivel().construirDesdeArchivo("resources/configuraciones/nivel1.txt");
         assertEquals("1", n.obtenerId());
         assertEquals(800, n.obtenerAncho());
@@ -25,28 +30,28 @@ class ConstructorNivelTest {
     }
 
     @Test
-    void rutaInexistenteLanzaExcepcionDelDominio() {
+    void noDeberiaCargarRutaInexistente() {
         ConstructorNivel c = new ConstructorNivel();
         assertThrows(TheDopoHardestGameException.class,
                 () -> c.construirDesdeArchivo("resources/configuraciones/nivel_inexistente.txt"));
     }
 
     @Test
-    void rutaNulaLanzaExcepcionDelDominio() {
+    void noDeberiaCargarRutaNula() {
         ConstructorNivel c = new ConstructorNivel();
         assertThrows(TheDopoHardestGameException.class,
                 () -> c.construirDesdeArchivo(null));
     }
 
     @Test
-    void nivel2TieneCheckpointIntermedio() {
+    void deberiaContenerCheckpointIntermedioEnNivel2() {
         Nivel n = new ConstructorNivel().construirDesdeArchivo("resources/configuraciones/nivel2.txt");
         boolean tieneCheckpoint = n.getZonas().stream().anyMatch(z -> z instanceof ZonaIntermedia);
         assertTrue(tieneCheckpoint, "El nivel 2 debe contener una ZonaIntermedia");
     }
 
     @Test
-    void nivel3TieneBombaYFuente() {
+    void deberiaContenerBombaYFuenteEnNivel3() {
         Nivel n = new ConstructorNivel().construirDesdeArchivo("resources/configuraciones/nivel3.txt");
         assertFalse(n.getBombas().isEmpty(),  "Nivel 3 debe tener bombas");
         assertFalse(n.getFuentes().isEmpty(), "Nivel 3 debe tener fuentes de vida");

@@ -1,6 +1,7 @@
 package presentation;
 
-import domain.*;
+import domain.core.ModoJuego;
+import domain.core.TheDOPOHardestGame;
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
@@ -29,7 +30,7 @@ public class ControlPanel extends JPanel {
         panelStatsJugadores.setOpaque(false);
         lblMonedas          = etiqueta("Monedas: 0/0");
         lblEstadoJuego      = etiqueta("Estado: MENU");
-        lblMensaje          = etiqueta("WASD: mover  |  ESC: pausa  |  R: reiniciar  |  M: menú");
+        lblMensaje          = etiqueta("");
         lblMensaje.setForeground(new Color(160, 160, 160));
 
         add(lblTiempo);
@@ -70,6 +71,11 @@ public class ControlPanel extends JPanel {
         }
         lblMonedas.setText("Monedas: " + monedas + "/" + total);
         lblEstadoJuego.setText("Estado: " + juego.getEstado());
+        ModoJuego modo = juego.getModo();
+        String hint = modo == ModoJuego.PvsP
+                ? "J1: WASD  |  J2: Flechas  |  ESC: pausa  |  R: reiniciar  |  M: menú"
+                : "WASD: mover  |  ESC: pausa  |  R: reiniciar  |  M: menú";
+        lblMensaje.setText(hint);
     }
 
     public void mostrarMensaje(String mensaje) { lblMensaje.setText(mensaje); }
