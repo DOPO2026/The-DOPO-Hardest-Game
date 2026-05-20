@@ -83,6 +83,7 @@ public class Jugador extends Elemento {
     }
 
     public void agregarEscudo()           { vidas++; }
+    public void setMuertes(int m)         { muertes = m; }
     public int obtenerMuertes()           { return muertes; }
     public int obtenerVidas()             { return vidas; }
     public ControlJugador getControl()    { return control; }

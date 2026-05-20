@@ -12,6 +12,7 @@ import domain.skins.Skin;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -21,10 +22,10 @@ import java.util.List;
  * Usa CardLayout a nivel de JFrame para alternar entre menú y juego.
  */
 public class TheDOPOHardestGameGUI implements Runnable, KeyListener {
-    private static final int ESCALA = 1;
-    private static final int ANCHO_VENTANA = 800;
-    private static final int ALTO_VENTANA  = 600;
-    private static final int DELAY_AVANCE_MS = 2200;
+    private static final int    ESCALA          = 1;
+    private static final int    ANCHO_VENTANA   = 800;
+    private static final int    ALTO_VENTANA    = 600;
+    private static final String RUTA_GUARDADO   = "resources/saves/partida.txt";
 
     private JFrame frame;
     private CardLayout layoutRaiz;
@@ -39,7 +40,6 @@ public class TheDOPOHardestGameGUI implements Runnable, KeyListener {
     private List<InputManager> inputManagers;
     private Thread hilo;
     private volatile boolean corriendo;
-    private volatile boolean avanceProgramado;
 
     public TheDOPOHardestGameGUI() {
         juego = new TheDOPOHardestGame();
@@ -55,7 +55,7 @@ public class TheDOPOHardestGameGUI implements Runnable, KeyListener {
         layoutRaiz = new CardLayout();
         contenedor = new JPanel(layoutRaiz);
 
-        menu = new MenuManager(this::iniciarJuegoConfigurado);
+        menu = new MenuManager(this::iniciarJuegoConfigurado, this::cargarPartidaGuardada);
 
         panelJuegoContainer = new JPanel(new BorderLayout());
         panelJuego   = new GamePanel(juego, ESCALA);
@@ -95,13 +95,23 @@ public class TheDOPOHardestGameGUI implements Runnable, KeyListener {
         }
         juego.iniciar(sel.modo, sel.rutaNivel, skins, colores);
         ajustarLienzoYInputs();
-
         layoutRaiz.show(contenedor, "juego");
         arrancarLoopSiNecesario();
     }
 
-    /** Ajusta el panel a las dimensiones del nivel y reconecta los InputManagers
-     *  a las nuevas instancias de ControlHumano que crea spawnJugadores(). */
+    private void cargarPartidaGuardada() {
+        try {
+            juego.cargarPartida(RUTA_GUARDADO);
+            ajustarLienzoYInputs();
+            layoutRaiz.show(contenedor, "juego");
+            arrancarLoopSiNecesario();
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(frame, "No se pudo cargar la partida:\n" + ex.getMessage(),
+                    "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    /** Ajusta el panel a las dimensiones del nivel y reconecta los InputManagers. */
     private void ajustarLienzoYInputs() {
         Nivel nivel = juego.getNivelActual();
         panelJuego.ajustarTamanio(nivel.obtenerAncho(), nivel.obtenerAlto());
@@ -145,10 +155,7 @@ public class TheDOPOHardestGameGUI implements Runnable, KeyListener {
             SwingUtilities.invokeLater(() -> {
                 actualizarVista();
                 switch (estado) {
-                    case VICTORIA -> {
-                        mostrarVictoria(juego.obtenerTiempoRestante());
-                        programarAvanceNivel();
-                    }
+                    case VICTORIA -> mostrarVictoria(juego.obtenerTiempoRestante());
                     case DERROTA  -> mostrarDerrota();
                     case PAUSADO  -> mostrarPausa();
                     default       -> {}
@@ -161,24 +168,6 @@ public class TheDOPOHardestGameGUI implements Runnable, KeyListener {
                 catch (InterruptedException ignored) {}
             }
         }
-    }
-
-    /** Programa una transición al siguiente nivel tras una breve pausa para
-     *  mostrar el cartel de VICTORIA. Reentrante-seguro vía bandera. */
-    private void programarAvanceNivel() {
-        if (avanceProgramado) return;
-        avanceProgramado = true;
-        Timer t = new Timer(DELAY_AVANCE_MS, ev -> {
-            if (juego.getEstado() != EstadoJuego.VICTORIA) {
-                avanceProgramado = false;
-                return;
-            }
-            juego.avanzarNivel();
-            ajustarLienzoYInputs();
-            avanceProgramado = false;
-        });
-        t.setRepeats(false);
-        t.start();
     }
 
     public void actualizarVista() {
@@ -196,25 +185,30 @@ public class TheDOPOHardestGameGUI implements Runnable, KeyListener {
                 nivel.obtenerMonedasTotales());
     }
 
-    public void mostrarPausa() { panelControl.mostrarMensaje("PAUSADO  —  ESC para continuar"); }
+    public void mostrarPausa() {
+        panelControl.mostrarMensaje("PAUSADO  |  ESC: continuar  |  S: guardar  |  M: menú");
+    }
 
     public void mostrarVictoria(double tiempo) {
         String ganador = juego.obtenerMensajeGanador();
-        String msg = ganador.isEmpty()
-                ? String.format("¡VICTORIA!  T: %.0fs  |  cargando siguiente nivel...", tiempo)
-                : String.format("¡VICTORIA!  %s  |  T: %.0fs  |  cargando...", ganador, tiempo);
-        panelControl.mostrarMensaje(msg);
+        String base = ganador.isEmpty()
+                ? String.format("¡VICTORIA!  T: %.0fs", tiempo)
+                : String.format("¡VICTORIA!  %s  |  T: %.0fs", ganador, tiempo);
+        panelControl.mostrarMensaje(base + "  |  N: siguiente nivel  |  R: reiniciar  |  M: menú");
     }
 
     public void mostrarDerrota() {
         String ganador = juego.obtenerMensajeGanador();
-        String base = "¡TIEMPO AGOTADO!  |  R reinicia  |  M menú";
+        String base = "¡TIEMPO AGOTADO!  |  R: reiniciar  |  M: menú";
         panelControl.mostrarMensaje(ganador.isEmpty() ? base : ganador + "  |  " + base);
     }
 
-    public void reiniciarNivel() { juego.reiniciar(); ajustarLienzoYInputs(); }
+    public void reiniciarNivel()  { juego.reiniciar(); ajustarLienzoYInputs(); }
+    public void siguienteNivel()  { juego.avanzarNivel(); ajustarLienzoYInputs(); }
+
     public void volverAlMenu() {
         juego.terminar();
+        inputManagers.clear();
         layoutRaiz.show(contenedor, "menu");
         menu.mostrarPrincipal();
     }
@@ -224,14 +218,30 @@ public class TheDOPOHardestGameGUI implements Runnable, KeyListener {
     public void keyPressed(KeyEvent e) {
         int code = e.getKeyCode();
         EstadoJuego estado = juego.getEstado();
+
         if (code == KeyEvent.VK_ESCAPE) {
-            if (estado == EstadoJuego.JUGANDO)   juego.pausar();
+            if (estado == EstadoJuego.JUGANDO)  juego.pausar();
             else if (estado == EstadoJuego.PAUSADO) juego.reanudar();
-        } else if (code == KeyEvent.VK_R && estado != EstadoJuego.JUGANDO && estado != EstadoJuego.MENU) {
+        } else if (code == KeyEvent.VK_R
+                && estado != EstadoJuego.JUGANDO && estado != EstadoJuego.MENU) {
             reiniciarNivel();
+        } else if ((code == KeyEvent.VK_N || code == KeyEvent.VK_ENTER)
+                && estado == EstadoJuego.VICTORIA) {
+            siguienteNivel();
         } else if (code == KeyEvent.VK_M && estado != EstadoJuego.MENU) {
             volverAlMenu();
+        } else if (code == KeyEvent.VK_S
+                && (estado == EstadoJuego.JUGANDO || estado == EstadoJuego.PAUSADO)) {
+            try {
+                juego.guardarPartida(RUTA_GUARDADO);
+                menu.marcarPartidaGuardada(true);
+                panelControl.mostrarMensaje("Partida guardada  |  ESC: continuar");
+                juego.pausar();
+            } catch (Exception ex) {
+                panelControl.mostrarMensaje("Error al guardar: " + ex.getMessage());
+            }
         }
+
         for (InputManager im : inputManagers) im.procesarTecla(e);
     }
 

@@ -63,4 +63,18 @@ public class TheDopoHardestGameException extends RuntimeException {
     public static TheDopoHardestGameException elementoDesconocido(String tipo) {
         return new TheDopoHardestGameException("Elemento desconocido: " + tipo);
     }
+
+    // GestorPartida
+
+    public static TheDopoHardestGameException errorGuardando(String ruta) {
+        return new TheDopoHardestGameException("No se pudo guardar la partida en: " + ruta);
+    }
+
+    public static TheDopoHardestGameException errorCargando(String ruta) {
+        return new TheDopoHardestGameException("No se pudo cargar la partida desde: " + ruta);
+    }
+
+    public static TheDopoHardestGameException partidaCorrupta(String detalle) {
+        return new TheDopoHardestGameException("Archivo de partida corrupto: " + detalle);
+    }
 }

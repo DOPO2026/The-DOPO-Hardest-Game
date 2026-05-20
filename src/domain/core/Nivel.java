@@ -70,6 +70,13 @@ public class Nivel {
         return c;
     }
 
+    public boolean estaCheckpointGuardado()        { return checkpointGuardado; }
+    public int getMonedasPendientesEnCheckpoint()  { return monedasPendientesEnCheckpoint; }
+    public void restaurarEstadoCheckpoint(boolean guardado, int pendientes) {
+        checkpointGuardado = guardado;
+        monedasPendientesEnCheckpoint = pendientes;
+    }
+
     public void registrarGanador(int idx) { ganadorIndex = idx; }
     public int  obtenerGanadorIndex()     { return ganadorIndex; }
 

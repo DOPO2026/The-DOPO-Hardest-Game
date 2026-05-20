@@ -1,16 +1,20 @@
 package domain.core;
 
+import domain.collectibles.Moneda;
 import domain.player.ControlHumano;
 import domain.player.ControlJugador;
 import domain.player.Jugador;
 import domain.ai.MaquinaAleatoria;
 import domain.skins.Blinky;
+import domain.skins.Clyde;
 import domain.skins.ColorJuego;
+import domain.skins.Inky;
 import domain.skins.Skin;
 import domain.world.Zona;
 import domain.world.ZonaFinal;
 import domain.world.ZonaInicial;
 
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -143,6 +147,100 @@ public class TheDOPOHardestGame {
     }
 
     public void terminar() { estado = EstadoJuego.MENU; }
+
+    public void guardarPartida(String ruta) {
+        if (nivelActual == null) return;
+        try {
+            File f = new File(ruta);
+            if (f.getParentFile() != null) f.getParentFile().mkdirs();
+            try (PrintWriter pw = new PrintWriter(new FileWriter(f))) {
+                pw.println("VERSION=1");
+                pw.println("MODO=" + modo.name());
+                pw.println("NIVEL=" + rutaNivelActual);
+                pw.println("TIEMPO=" + tiempoTranscurrido);
+                List<Jugador> jugadores = nivelActual.getJugadores();
+                pw.println("JUGADORES=" + jugadores.size());
+                for (int i = 0; i < jugadores.size(); i++) {
+                    pw.println("SKIN" + i + "=" + nombreSkin(skinsConfiguradas.size() > i ? skinsConfiguradas.get(i) : new Blinky()));
+                    pw.println("COLOR" + i + "=" + (coloresConfigurados.size() > i ? coloresConfigurados.get(i).name() : "NEGRO"));
+                    pw.println("J" + i + "_MUERTES=" + jugadores.get(i).obtenerMuertes());
+                }
+                List<Moneda> monedas = nivelActual.getMonedas();
+                pw.println("MONEDAS=" + monedas.size());
+                for (int i = 0; i < monedas.size(); i++) {
+                    Moneda m = monedas.get(i);
+                    pw.println("M" + i + "=" + (m.estaRecolectada() ? 1 : 0)
+                            + "," + m.getColectorIndex()
+                            + "," + (m.estaGuardadaEnCheckpoint() ? 1 : 0));
+                }
+                pw.println("CHECKPOINT=" + (nivelActual.estaCheckpointGuardado() ? 1 : 0));
+                pw.println("CHECKPOINT_PENDIENTES=" + nivelActual.getMonedasPendientesEnCheckpoint());
+            }
+        } catch (IOException e) {
+            throw TheDopoHardestGameException.errorGuardando(ruta);
+        }
+    }
+
+    public void cargarPartida(String ruta) {
+        try (BufferedReader br = new BufferedReader(new FileReader(ruta))) {
+            java.util.Properties p = new java.util.Properties();
+            br.lines().filter(l -> l.contains("=")).forEach(l -> {
+                int idx = l.indexOf('=');
+                p.setProperty(l.substring(0, idx).trim(), l.substring(idx + 1).trim());
+            });
+            ModoJuego modoGuardado = ModoJuego.valueOf(p.getProperty("MODO", "PLAYER"));
+            String nivelGuardado   = p.getProperty("NIVEL");
+            double tiempoGuardado  = Double.parseDouble(p.getProperty("TIEMPO", "0"));
+            int nJugadores = Integer.parseInt(p.getProperty("JUGADORES", "1"));
+            List<Skin> skins   = new ArrayList<>();
+            List<ColorJuego> colores = new ArrayList<>();
+            for (int i = 0; i < nJugadores; i++) {
+                skins.add(crearSkin(p.getProperty("SKIN" + i, "Blinky")));
+                colores.add(ColorJuego.valueOf(p.getProperty("COLOR" + i, "NEGRO")));
+            }
+            iniciar(modoGuardado, nivelGuardado, skins, colores);
+            tiempoTranscurrido = tiempoGuardado;
+            // Restaurar monedas
+            List<Moneda> monedas = nivelActual.getMonedas();
+            int nMonedas = Integer.parseInt(p.getProperty("MONEDAS", "0"));
+            for (int i = 0; i < Math.min(nMonedas, monedas.size()); i++) {
+                String[] parts = p.getProperty("M" + i, "0,-1,0").split(",");
+                if ("1".equals(parts[0])) {
+                    int colector = Integer.parseInt(parts[1]);
+                    monedas.get(i).recolectarPor(colector);
+                    nivelActual.registrarRecoleccion();
+                    if (parts.length > 2 && "1".equals(parts[2])) monedas.get(i).guardarEnCheckpoint();
+                }
+            }
+            // Restaurar checkpoint y muertes
+            boolean ckpt = "1".equals(p.getProperty("CHECKPOINT", "0"));
+            int ckptPendientes = Integer.parseInt(p.getProperty("CHECKPOINT_PENDIENTES", "0"));
+            nivelActual.restaurarEstadoCheckpoint(ckpt, ckptPendientes);
+            List<Jugador> jugadores = nivelActual.getJugadores();
+            for (int i = 0; i < jugadores.size(); i++) {
+                String key = "J" + i + "_MUERTES";
+                if (p.containsKey(key)) jugadores.get(i).setMuertes(Integer.parseInt(p.getProperty(key)));
+            }
+        } catch (IOException e) {
+            throw TheDopoHardestGameException.errorCargando(ruta);
+        } catch (Exception e) {
+            throw TheDopoHardestGameException.partidaCorrupta(e.getMessage());
+        }
+    }
+
+    private static String nombreSkin(Skin s) {
+        if (s instanceof Clyde) return "Clyde";
+        if (s instanceof Inky)  return "Inky";
+        return "Blinky";
+    }
+
+    private static Skin crearSkin(String nombre) {
+        return switch (nombre) {
+            case "Clyde" -> new Clyde();
+            case "Inky"  -> new Inky();
+            default      -> new Blinky();
+        };
+    }
 
     public String obtenerMensajeGanador() {
         if (nivelActual == null || modo == ModoJuego.PLAYER) return "";

@@ -17,6 +17,7 @@ public abstract class Moneda extends Elemento {
     public void reiniciar()                     { if (!guardadaEnCheckpoint) { recolectada = false; colectorIndex = -1; } }
     public void reiniciarDeJugador(int idx)     { if (colectorIndex == idx && !guardadaEnCheckpoint) { recolectada = false; colectorIndex = -1; } }
     public boolean estaRecolectada()            { return recolectada; }
+    public boolean estaGuardadaEnCheckpoint()   { return guardadaEnCheckpoint; }
     public int    getColectorIndex()            { return colectorIndex; }
 
     @Override

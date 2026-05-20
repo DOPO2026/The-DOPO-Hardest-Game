@@ -21,11 +21,15 @@ public class MenuManager extends JPanel {
     private final JPanel cards      = new JPanel(layout);
     private final SeleccionMenu seleccion = new SeleccionMenu();
     private final Consumer<SeleccionMenu> alListo;
+    private final Runnable alCargar;
+    private boolean hayPartidaGuardada = false;
+    private JButton btnCargar;
 
     private int jugadorActual = 0; // 0 = J1, 1 = J2
 
-    public MenuManager(Consumer<SeleccionMenu> alListo) {
-        this.alListo = alListo;
+    public MenuManager(Consumer<SeleccionMenu> alListo, Runnable alCargar) {
+        this.alListo  = alListo;
+        this.alCargar = alCargar;
         setLayout(new BorderLayout());
         setBackground(new Color(18, 18, 28));
         cards.setOpaque(false);
@@ -40,7 +44,16 @@ public class MenuManager extends JPanel {
         layout.show(cards, "principal");
     }
 
-    public void mostrarPrincipal() { layout.show(cards, "principal"); }
+    public void mostrarPrincipal() {
+        hayPartidaGuardada = new java.io.File("resources/saves/partida.txt").exists();
+        if (btnCargar != null) btnCargar.setVisible(hayPartidaGuardada);
+        layout.show(cards, "principal");
+    }
+
+    public void marcarPartidaGuardada(boolean existe) {
+        hayPartidaGuardada = existe;
+        if (btnCargar != null) btnCargar.setVisible(existe);
+    }
 
     // ── Pantalla 1: Principal ────────────────────────────────────────────────
     private JPanel crearPanelPrincipal() {
@@ -52,6 +65,11 @@ public class MenuManager extends JPanel {
         p.add(subtitulo("DOPO 2026-1"));
         p.add(Box.createVerticalStrut(60));
         p.add(boton("JUGAR",  () -> layout.show(cards, "modo")));
+        p.add(Box.createVerticalStrut(15));
+        btnCargar = boton("CARGAR PARTIDA", alCargar::run);
+        btnCargar.setBackground(new Color(40, 120, 80));
+        btnCargar.setVisible(new java.io.File("resources/saves/partida.txt").exists());
+        p.add(btnCargar);
         p.add(Box.createVerticalStrut(15));
         p.add(boton("SALIR",  () -> System.exit(0)));
         return p;
