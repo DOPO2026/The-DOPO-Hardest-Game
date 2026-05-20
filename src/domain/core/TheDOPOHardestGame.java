@@ -8,6 +8,7 @@ import domain.skins.Blinky;
 import domain.skins.ColorJuego;
 import domain.skins.Skin;
 import domain.world.Zona;
+import domain.world.ZonaFinal;
 import domain.world.ZonaInicial;
 
 import java.util.ArrayList;
@@ -58,8 +59,10 @@ public class TheDOPOHardestGame {
     private void spawnJugadores() {
         controles.clear();
         List<ZonaInicial> inicios = new ArrayList<>();
+        List<ZonaFinal>   fines   = new ArrayList<>();
         for (Zona z : nivelActual.getZonas()) {
             if (z instanceof ZonaInicial zi) inicios.add(zi);
+            if (z instanceof ZonaFinal   zf) fines.add(zf);
         }
         if (inicios.isEmpty()) {
             throw TheDopoHardestGameException.nivelSinZonaInicial();
@@ -71,15 +74,23 @@ public class TheDOPOHardestGame {
         };
 
         for (int i = 0; i < cantidad; i++) {
-            Skin       skin   = skinsConfiguradas.size()   > i ? skinsConfiguradas.get(i)   : new Blinky();
-            ColorJuego color  = coloresConfigurados.size() > i ? coloresConfigurados.get(i) : (i == 0 ? ColorJuego.NEGRO : ColorJuego.BLANCO);
-            // En multijugador usa zonas opuestas (primera y última inicial).
-            ZonaInicial zona  = inicios.get(Math.min(i, inicios.size() - 1));
-            if (modo != ModoJuego.PLAYER && inicios.size() > 1 && i == 1) zona = inicios.get(inicios.size() - 1);
+            Skin       skin  = skinsConfiguradas.size()   > i ? skinsConfiguradas.get(i)   : new Blinky();
+            ColorJuego color = coloresConfigurados.size() > i ? coloresConfigurados.get(i) : (i == 0 ? ColorJuego.NEGRO : ColorJuego.BLANCO);
 
-            int tam = 18;
-            int spawnX = zona.obtenerPosX() + (zona.obtenerAncho() - tam) / 2;
-            int spawnY = zona.obtenerPosY() + (zona.obtenerAlto()  - tam) / 2;
+            Zona zonaSpawn;
+            if (i == 0) {
+                zonaSpawn = inicios.get(0);
+            } else if (inicios.size() > 1) {
+                zonaSpawn = inicios.get(inicios.size() - 1);
+            } else if (!fines.isEmpty()) {
+                zonaSpawn = fines.get(0);
+            } else {
+                zonaSpawn = inicios.get(0);
+            }
+
+            int tam    = 18;
+            int spawnX = zonaSpawn.obtenerPosX() + (zonaSpawn.obtenerAncho() - tam) / 2;
+            int spawnY = zonaSpawn.obtenerPosY() + (zonaSpawn.obtenerAlto()  - tam) / 2;
 
             ControlJugador control;
             if (modo == ModoJuego.PvsM && i == 1) {
@@ -89,8 +100,7 @@ public class TheDOPOHardestGame {
                 controles.add(humano);
                 control = humano;
             }
-            Jugador j = new Jugador(spawnX, spawnY, tam, tam, control, skin, color);
-            nivelActual.agregarJugador(j);
+            nivelActual.agregarJugador(new Jugador(spawnX, spawnY, tam, tam, control, skin, color));
         }
     }
 
