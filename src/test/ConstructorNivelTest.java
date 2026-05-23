@@ -19,7 +19,7 @@ class ConstructorNivelTest {
         assertEquals(558, n.obtenerAlto());
         assertEquals(90.0, n.obtenerTiempoLimite(), 0.001);
         assertEquals(4, n.obtenerMonedasTotales());
-        assertEquals(4, n.getEnemigos().size());
+        assertEquals(5, n.getEnemigos().size()); // 4 BASICO + 1 PATRULLERO
         // Al menos las paredes perimetrales + las internas del archivo
         assertTrue(n.getParedes().size() >= 4);
         // Inicio y fin
