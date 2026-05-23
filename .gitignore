@@ -2,9 +2,7 @@
 /bin/
 /out/
 
-# Configuraciones locales de Eclipse
-.classpath
-.project
+# Configuraciones locales de Eclipse (settings opcionales)
 /.settings/
 
 # Configuración local de IntelliJ
