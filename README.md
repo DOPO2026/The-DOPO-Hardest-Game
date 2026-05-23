@@ -138,7 +138,7 @@ decisiones tomadas y el resultado final alcanzado.
 ---
 ## 2. Resultado Inicial
 Al ejecutar las pruebas unitarias se obtuvo el siguiente resultado:
-![Captura](recursos_dinamico/TheDOPOPicture1.png)
+![Captura](./TheDOPOPicture1.png)
 
 > La capa `presentation` (código Swing/GUI) se excluye del análisis porque no es comprobable con tests unitarios. La cobertura reportada corresponde al paquete `domain` y sus sub-paquetes.
 ---
@@ -261,7 +261,7 @@ Nuevas ramas cubiertas en `procesarInteracciones`:
 
 ---
 ## 3. Resultado Final
-![Captura](recursos_dinamico/TheDOPOPicture2.png)
+![Captura](./TheDOPOPicture2.png)
 ## Resumen 
 
 | Métrica | Antes | Después | Cambio |
