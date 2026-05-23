@@ -122,6 +122,101 @@ The-DOPO-Hardest-Game/
 
 ---
 ##   informe PMD:
+
+**Herramienta:** PMD 7.23.0  
+**Conjunto de reglas:** `rulesets/java/quickstart.xml`  
+**Ámbito:** paquete `domain` y sus sub-paquetes (se excluye `presentation` porque el análisis estático de código Swing no aporta valor al dominio de negocio).
+
+---
+
+## 1. Introducción
+
+Este informe documenta el análisis estático aplicado al proyecto TheDOPOHardestGame mediante la herramienta PMD. El objetivo es identificar violaciones de buenas prácticas en el código fuente de la capa de dominio, clasificarlas por tipo y archivo, y documentar las decisiones tomadas respecto a cada una.
+
+---
+
+## 2. Resultado del análisis
+
+El análisis arrojó **107 violaciones** distribuidas en 18 archivos del paquete `domain`.
+
+### Violaciones por regla
+
+| Regla | Violaciones | Descripción |
+|---|---|---|
+| `ControlStatementBraces` | 66 | Sentencias `if/for/while` sin llaves explícitas |
+| `OneDeclarationPerLine` | 20 | Múltiples declaraciones de variables en una sola línea |
+| `PreserveStackTrace` | 6 | Se lanza una nueva excepción sin encadenar la causa original |
+| `UnusedPrivateField` | 2 | Campos privados declarados pero nunca leídos |
+| `UnusedPrivateMethod` | 2 | Métodos privados declarados pero nunca invocados |
+| `UnusedFormalParameter` | 2 | Parámetros de método que no se usan en el cuerpo |
+| `UncommentedEmptyMethodBody` | 2 | Cuerpos de método vacíos sin comentario explicativo |
+| `LiteralsFirstInComparisons` | 2 | La literal debería ir a la izquierda del `equals` para evitar NPE |
+| `ClassWithOnlyPrivateConstructorsShouldBeFinal` | 1 | Clase con constructores privados que podría declararse `final` |
+| `ReturnEmptyCollectionRatherThanNull` | 1 | Se retorna `null` donde debería retornarse una colección vacía |
+| `UselessParentheses` | 1 | Paréntesis innecesarios que no aportan claridad |
+| `UncommentedEmptyConstructor` | 1 | Constructor vacío sin comentario que explique su propósito |
+| `AvoidBranchingStatementAsLastInLoop` | 1 | `continue` como última instrucción de un bucle (equivale a no ponerlo) |
+
+### Archivos con más violaciones
+
+| Archivo | Violaciones |
+|---|---|
+| `TheDOPOHardestGame.java` | 31 |
+| `MaquinaExperta.java` | 24 |
+| `Nivel.java` | 10 |
+| `ConstructorNivel.java` | 7 |
+| `Basico.java` | 6 |
+| `GestorArchivos.java` | 5 |
+| `MotorJuego.java` | 5 |
+| `Jugador.java` | 4 |
+| `DeslizadorVertical.java` | 3 |
+| Resto de archivos (9) | 12 |
+
+---
+
+## 3. Análisis de las violaciones
+
+### `ControlStatementBraces` — 66 violaciones (62 % del total)
+
+La gran mayoría de las violaciones corresponden a sentencias de control sin llaves. Esto es un patrón estilístico adoptado deliberadamente en el proyecto para mantener el código conciso en condiciones de una sola línea. Si bien PMD lo reporta como violación, el código es correcto y legible en su contexto. Se decide **no corregir** masivamente esta regla para no introducir ruido en el historial de cambios.
+
+### `OneDeclarationPerLine` — 20 violaciones
+
+Declaraciones del estilo `int x, y;` presentes principalmente en `MaquinaExperta` y clases de entidad (`Basico`, `DeslizadorVertical`, `Jugador`). Se trata de un estilo compacto para variables relacionadas (coordenadas, límites). Se decide **mantener** en los casos donde las variables son conceptualmente un par (ej. `dx, dy`).
+
+### `PreserveStackTrace` — 6 violaciones (todas en `TheDOPOHardestGame`)
+
+Al capturar una excepción y relanzar una `TheDopoHardestGameException`, no se pasa la causa original como argumento, perdiendo el stack trace. Esto dificulta el diagnóstico en producción. Se decide **corregir** estas 6 instancias encadenando la causa con `new TheDopoHardestGameException(mensaje, e)`.
+
+### `UnusedPrivateField` — 2 violaciones (`Enemigo.velocidad`, `Enemigo.direccion`)
+
+Campos declarados en `Enemigo` que nunca son leídos — el movimiento se delega a `EstrategiaMovimiento`. Son residuos de un diseño anterior. Se decide **eliminarlos**.
+
+### `ReturnEmptyCollectionRatherThanNull` — 1 violación (`MaquinaExperta`)
+
+El método de reconstrucción de ruta retorna `null` cuando no encuentra camino en lugar de una lista vacía. Esto obliga a los llamadores a comprobar `null`. Se decide **corregir** retornando `Collections.emptyList()`.
+
+### `LiteralsFirstInComparisons` — 2 violaciones
+
+Comparaciones del tipo `variable.equals("literal")` en lugar de `"literal".equals(variable)`. Si `variable` fuera `null`, se lanzaría un `NullPointerException`. Se decide **corregir** invirtiendo el orden.
+
+### Violaciones menores aceptadas
+
+Las violaciones de `UncommentedEmptyMethodBody`, `UncommentedEmptyConstructor`, `UselessParentheses`, `AvoidBranchingStatementAsLastInLoop` y `ClassWithOnlyPrivateConstructorsShouldBeFinal` se dejan como están: corresponden a stubs intencionales o detalles de estilo sin impacto en la corrección del programa.
+
+---
+
+## 4. Correcciones aplicadas
+
+| Regla | Instancias corregidas | Archivos afectados |
+|---|---|---|
+| `PreserveStackTrace` | 6 | `TheDOPOHardestGame.java` |
+| `UnusedPrivateField` | 2 | `Enemigo.java` |
+| `ReturnEmptyCollectionRatherThanNull` | 1 | `MaquinaExperta.java` |
+| `LiteralsFirstInComparisons` | 2 | `ConstructorNivel.java`, `GestorArchivos.java` |
+
+Tras aplicar las correcciones el análisis reporta **96 violaciones**, correspondientes en su totalidad a decisiones de estilo aceptadas (`ControlStatementBraces`, `OneDeclarationPerLine`) o stubs intencionales.
+
 ---
 ---
 ##   informe test coverage:  
