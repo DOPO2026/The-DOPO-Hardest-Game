@@ -1,6 +1,3 @@
-# The-DOPO-Hardest-Game
-Proyecto final del curso de Desarrollo Orientado por Objetos 2026-1
-
 # The DOPO Hardest Game
 
 Proyecto final de DOPO 2026-1  
