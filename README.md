@@ -394,19 +394,12 @@ cd The-DOPO-Hardest-Game
 
 **Linux / macOS (bash):**
 ```bash
-mkdir -p out
-find src -name "*.java" ! -path "*/test/*" > sources.txt
-javac -cp lib/junit-platform-console-standalone-1.10.2.jar -d out @sources.txt
+mkdir -p out && javac -cp lib/junit-platform-console-standalone-1.10.2.jar -d out $(find src -name "*.java" ! -path "*/test/*")
 ```
 
 **Windows (PowerShell):**
 ```powershell
-New-Item -ItemType Directory -Force out | Out-Null
-Get-ChildItem -Recurse -Path src -Filter "*.java" |
-    Where-Object { $_.FullName -notlike "*\test\*" } |
-    Select-Object -ExpandProperty FullName |
-    Out-File -Encoding utf8 sources.txt
-javac -cp "lib/junit-platform-console-standalone-1.10.2.jar" -d out "@sources.txt"
+New-Item -ItemType Directory -Force out | Out-Null; javac -cp "lib/junit-platform-console-standalone-1.10.2.jar" -d out (Get-ChildItem -Recurse -Path src -Filter "*.java" | Where-Object { $_.FullName -notlike "*\test\*" } | Select-Object -ExpandProperty FullName)
 ```
 
 ### 3. Ejecutar el juego
@@ -425,16 +418,12 @@ java -cp out presentation.TheDOPOHardestGameGUI
 
 **Linux / macOS:**
 ```bash
-find src -name "*.java" > sources_all.txt
-javac -cp lib/junit-platform-console-standalone-1.10.2.jar -d out @sources_all.txt
+javac -cp lib/junit-platform-console-standalone-1.10.2.jar -d out $(find src -name "*.java")
 ```
 
 **Windows (PowerShell):**
 ```powershell
-Get-ChildItem -Recurse -Path src -Filter "*.java" |
-    Select-Object -ExpandProperty FullName |
-    Out-File -Encoding utf8 sources_all.txt
-javac -cp "lib/junit-platform-console-standalone-1.10.2.jar" -d out "@sources_all.txt"
+javac -cp "lib/junit-platform-console-standalone-1.10.2.jar" -d out (Get-ChildItem -Recurse -Path src -Filter "*.java" | Select-Object -ExpandProperty FullName)
 ```
 
 ### 5. Ejecutar los tests
