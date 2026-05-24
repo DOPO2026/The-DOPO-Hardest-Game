@@ -149,7 +149,9 @@ public class MenuManager extends JPanel {
     }
 
     private void actualizarPanelPersonaje() {
-        lblPersonaje.setText(jugadorActual == 0 ? "PERSONAJE J1" : "PERSONAJE J2");
+        if (jugadorActual == 0)                          lblPersonaje.setText("PERSONAJE J1");
+        else if (seleccion.modo == ModoJuego.PvsM)       lblPersonaje.setText("PERSONAJE MÁQUINA");
+        else                                             lblPersonaje.setText("PERSONAJE J2");
     }
 
     private JComponent tarjetaPersonaje(Skin skin, String descripcion) {
@@ -247,7 +249,9 @@ public class MenuManager extends JPanel {
     }
 
     private void actualizarPanelColor() {
-        lblColor.setText(jugadorActual == 0 ? "COLOR DE BORDE J1" : "COLOR DE BORDE J2");
+        if (jugadorActual == 0)                          lblColor.setText("COLOR DE BORDE J1");
+        else if (seleccion.modo == ModoJuego.PvsM)       lblColor.setText("COLOR DE BORDE MÁQUINA");
+        else                                             lblColor.setText("COLOR DE BORDE J2");
     }
 
     private JButton swatch(ColorJuego c) {
@@ -265,7 +269,7 @@ public class MenuManager extends JPanel {
         if (jugadorActual == 0) seleccion.colorJ1 = c;
         else                    seleccion.colorJ2 = c;
 
-        boolean necesitaJ2 = (seleccion.modo == ModoJuego.PvsP) && jugadorActual == 0;
+        boolean necesitaJ2 = (seleccion.modo == ModoJuego.PvsP || seleccion.modo == ModoJuego.PvsM) && jugadorActual == 0;
         if (necesitaJ2) {
             jugadorActual = 1;
             actualizarPanelPersonaje();
