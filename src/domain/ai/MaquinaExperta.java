@@ -45,8 +45,14 @@ public class MaquinaExperta implements ControlJugador {
         if (objetivo == null) return Direction.QUIETO;
 
         frame++;
-        boolean nuevoObjetivo = objetivo[0] != targetPx || objetivo[1] != targetPy;
-        if (nuevoObjetivo || waypoints.isEmpty() || frame % RECALC_FRAMES == 0) {
+        boolean nuevoObjetivo      = objetivo[0] != targetPx || objetivo[1] != targetPy;
+        boolean mismaCeldaObjetivo = (yo.obtenerPosX() / CELL == objetivo[0] / CELL)
+                                  && (yo.obtenerPosY() / CELL == objetivo[1] / CELL);
+        boolean necesitaRecalculo  = nuevoObjetivo
+                || (waypoints.isEmpty() && !mismaCeldaObjetivo)
+                || frame % RECALC_FRAMES == 0;
+
+        if (necesitaRecalculo) {
             targetPx  = objetivo[0];
             targetPy  = objetivo[1];
             waypoints = bfs(yo.obtenerPosX(), yo.obtenerPosY(), targetPx, targetPy, grid);
@@ -130,6 +136,12 @@ public class MaquinaExperta implements ControlJugador {
             int dy = cy - yo.obtenerPosY();
             if (Math.abs(dx) < UMBRAL && Math.abs(dy) < UMBRAL) { wpIdx++; continue; }
             return dirFromDelta(dx, dy);
+        }
+        // Waypoints agotados o BFS misma celda: ajuste fino directo al objetivo en píxeles
+        if (targetPx != Integer.MIN_VALUE) {
+            int dx = targetPx - yo.obtenerPosX();
+            int dy = targetPy - yo.obtenerPosY();
+            if (Math.abs(dx) > 3 || Math.abs(dy) > 3) return dirFromDelta(dx, dy);
         }
         return Direction.QUIETO;
     }
