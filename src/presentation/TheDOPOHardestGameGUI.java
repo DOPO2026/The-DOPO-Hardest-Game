@@ -10,6 +10,7 @@ import domain.skins.ColorJuego;
 import domain.skins.Inky;
 import domain.skins.Skin;
 import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
@@ -22,16 +23,16 @@ import java.util.List;
  * Usa CardLayout a nivel de JFrame para alternar entre menú y juego.
  */
 public class TheDOPOHardestGameGUI implements Runnable, KeyListener {
-    private static final int    ESCALA          = 1;
-    private static final int    ANCHO_VENTANA   = 800;
-    private static final int    ALTO_VENTANA    = 600;
-    private static final String RUTA_GUARDADO   = "resources/saves/partida.txt";
+    private static final int ESCALA        = 1;
+    private static final int ANCHO_VENTANA = 800;
+    private static final int ALTO_VENTANA  = 600;
 
     private JFrame frame;
     private CardLayout layoutRaiz;
     private JPanel contenedor;
 
     private MenuManager menu;
+    private BarraMenu barraMenu;
     private JPanel panelJuegoContainer;
     private GamePanel panelJuego;
     private ControlPanel panelControl;
@@ -69,6 +70,10 @@ public class TheDOPOHardestGameGUI implements Runnable, KeyListener {
         contenedor.add(menu,                "menu");
         contenedor.add(panelJuegoContainer, "juego");
 
+        barraMenu = new BarraMenu(this::abrirPartidaDesdeArchivo,
+                this::guardarPartidaComo, this::cerrarAplicacion, this::puedeGuardar);
+        frame.setJMenuBar(barraMenu);
+
         frame.setContentPane(contenedor);
         KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(e -> {
             if (e.getID() == KeyEvent.KEY_PRESSED)   keyPressed(e);
@@ -104,8 +109,14 @@ public class TheDOPOHardestGameGUI implements Runnable, KeyListener {
     }
 
     private void cargarPartidaGuardada() {
+        JFileChooser selector = crearSelectorArchivo("Abrir partida");
+        if (selector.showOpenDialog(frame) == JFileChooser.APPROVE_OPTION)
+            cargarDesde(selector.getSelectedFile().getPath());
+    }
+
+    private void cargarDesde(String ruta) {
         try {
-            juego.cargarPartida(RUTA_GUARDADO);
+            juego.cargarPartida(ruta);
             ajustarLienzoYInputs();
             layoutRaiz.show(contenedor, "juego");
             arrancarLoopSiNecesario();
@@ -113,6 +124,67 @@ public class TheDOPOHardestGameGUI implements Runnable, KeyListener {
             JOptionPane.showMessageDialog(frame, "No se pudo cargar la partida:\n" + ex.getMessage(),
                     "Error", JOptionPane.ERROR_MESSAGE);
         }
+    }
+
+    // ── Menú Archivo: abrir / guardar como / cerrar ──────────────────────────
+    /** Hay algo que guardar mientras exista un nivel cargado fuera del menú. */
+    private boolean puedeGuardar() {
+        EstadoJuego e = juego.getEstado();
+        return e == EstadoJuego.JUGANDO || e == EstadoJuego.PAUSADO || e == EstadoJuego.VICTORIA;
+    }
+
+    /** Permite elegir un archivo y guardar la partida actual en él. Pausa el juego
+     *  mientras el diálogo está abierto para capturar un estado consistente. */
+    private void guardarPartidaComo() {
+        if (!puedeGuardar()) return;
+        boolean estabaJugando = juego.getEstado() == EstadoJuego.JUGANDO;
+        if (estabaJugando) juego.pausar();
+
+        JFileChooser selector = crearSelectorArchivo("Guardar partida como");
+        if (selector.showSaveDialog(frame) == JFileChooser.APPROVE_OPTION) {
+            File destino = asegurarExtensionTxt(selector.getSelectedFile());
+            try {
+                juego.guardarPartida(destino.getPath());
+                JOptionPane.showMessageDialog(frame, "Partida guardada en:\n" + destino.getPath(),
+                        "Guardado", JOptionPane.INFORMATION_MESSAGE);
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(frame, "No se pudo guardar la partida:\n" + ex.getMessage(),
+                        "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+        if (estabaJugando) juego.reanudar();
+    }
+
+    /** Permite elegir un archivo guardado y continuar la partida desde ese punto. */
+    private void abrirPartidaDesdeArchivo() {
+        boolean estabaJugando = juego.getEstado() == EstadoJuego.JUGANDO;
+        if (estabaJugando) juego.pausar();
+
+        JFileChooser selector = crearSelectorArchivo("Abrir partida");
+        if (selector.showOpenDialog(frame) == JFileChooser.APPROVE_OPTION) {
+            cargarDesde(selector.getSelectedFile().getPath());
+        } else if (estabaJugando) {
+            juego.reanudar();
+        }
+    }
+
+    private void cerrarAplicacion() {
+        int r = JOptionPane.showConfirmDialog(frame,
+                "¿Cerrar el juego? Se perderá el progreso no guardado.",
+                "Cerrar", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+        if (r == JOptionPane.YES_OPTION) System.exit(0);
+    }
+
+    private JFileChooser crearSelectorArchivo(String titulo) {
+        JFileChooser selector = new JFileChooser();
+        selector.setDialogTitle(titulo);
+        selector.setFileFilter(new FileNameExtensionFilter("Partidas guardadas (*.txt)", "txt"));
+        return selector;
+    }
+
+    private static File asegurarExtensionTxt(File f) {
+        return f.getName().toLowerCase().endsWith(".txt")
+                ? f : new File(f.getParentFile(), f.getName() + ".txt");
     }
 
     /** Ajusta el panel a las dimensiones del nivel y reconecta los InputManagers. */
@@ -220,6 +292,7 @@ public class TheDOPOHardestGameGUI implements Runnable, KeyListener {
     // ── Teclado ──────────────────────────────────────────────────────────────
     @Override
     public void keyPressed(KeyEvent e) {
+        if (!frameEsVentanaActiva()) return;
         int code = e.getKeyCode();
         EstadoJuego estado = juego.getEstado();
 
@@ -238,16 +311,7 @@ public class TheDOPOHardestGameGUI implements Runnable, KeyListener {
             System.exit(0);
         } else if (code == KeyEvent.VK_S
                 && (estado == EstadoJuego.PAUSADO || estado == EstadoJuego.VICTORIA)) {
-            try {
-                juego.guardarPartida(RUTA_GUARDADO);
-                menu.marcarPartidaGuardada(true);
-                if (estado == EstadoJuego.PAUSADO)
-                    panelControl.mostrarMensaje("Partida guardada  |  ESC: continuar  |  Q: salir");
-                else
-                    panelControl.mostrarMensaje("Progreso guardado  |  N: siguiente  |  M: menú");
-            } catch (Exception ex) {
-                panelControl.mostrarMensaje("Error al guardar: " + ex.getMessage());
-            }
+            guardarPartidaComo();
         }
 
         for (InputManager im : inputManagers) im.procesarTecla(e);
@@ -255,10 +319,18 @@ public class TheDOPOHardestGameGUI implements Runnable, KeyListener {
 
     @Override
     public void keyReleased(KeyEvent e) {
+        if (!frameEsVentanaActiva()) return;
         for (InputManager im : inputManagers) im.procesarTeclaLiberada(e);
     }
 
     @Override public void keyTyped(KeyEvent e) {}
+
+    /** Las teclas globales solo aplican cuando la ventana principal está activa;
+     *  evita que un diálogo modal (selector de archivo, confirmación) dispare
+     *  atajos como Q (salir) o M (menú) al teclear. */
+    private boolean frameEsVentanaActiva() {
+        return KeyboardFocusManager.getCurrentKeyboardFocusManager().getActiveWindow() == frame;
+    }
 
     // ── Punto de entrada ─────────────────────────────────────────────────────
     public static void main(String[] args) {
