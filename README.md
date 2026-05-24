@@ -459,3 +459,58 @@ Criterios aplicados al escribir los tests:
 | `M` | Volver al menú |
 | `Q` | Salir del juego |
 
+## Retrospectiva
+###1. Tiempo total invertido
+
+| Integrante | Horas estimadas |
+|---|---|
+| Natalia Rodriguez | 80 h |
+| Daniel Villamizar | 80 h |
+
+---
+### 2. Estado actual del proyecto
+
+El proyecto se encuentra **completo y funcional**. Se implementaron los tres niveles configurables, los tres modos de juego (1J, PvP, PvM), tipos de enemigos con movimientos distintos, tres skins con atributos diferenciados, sistema de guardado/carga, música de fondo en bucle y una IA experta basada en BFS con grilla dinámica. Las 81 pruebas unitarias pasan sin fallos.
+
+
+---
+
+### 3. Práctica XP más útil
+
+**Pruebas unitarias**
+
+Escribir las pruebas a la par del código de dominio obligó a diseñar clases con responsabilidades claras y bajo acoplamiento. Cada vez que se refactorizó un componente (por ejemplo, cambiar el movimiento del Patrullero de rectangular a elíptico, o agregar el seguimiento de monedas por jugador), las 81 pruebas funcionaron como red de seguridad: si algo se rompía, se detectaba de inmediato sin tener que abrir el juego. Esto redujo significativamente el tiempo de depuración y dio confianza para hacer cambios estructurales.
+---
+### 4. Mayor logro
+
+**La arquitectura por capas con separación total entre dominio y presentación.**
+
+Desde el inicio se decidió que el paquete `domain` no tendría ninguna dependencia de Swing. Esto permitió probar el 97 % de la lógica de negocio con JUnit sin necesitar una ventana gráfica, y facilitó agregar modos de juego (PvP, PvM), nuevos tipos de enemigos y skins sin tocar la capa de presentación. El resultado es un sistema extensible que se puede modificar con seguridad, lo cual se demostró al agregar la IA experta, la música y la selección de skin para la máquina sin romper nada de lo que ya funcionaba.
+
+---
+
+### 5. Mayor problema técnico
+
+**La integración de la inteligencia artificial experta con los corredores angostos del nivel 2.**
+
+El BFS sobre la grilla de 20 px funciona bien en espacios abiertos (nivel 1, 9 celdas de alto). En el nivel 2, los corredores son de exactamente 2 celdas de alto; cualquier enemigo con su huella de 2×2 bloquea la totalidad del pasaje. Intentamos reducir el margen de buffer (`MARGEN_ENEMIGO`), eliminar el fallback al grid estático y agregar detección reactiva de waypoints bloqueados, pero cada cambio rompía el nivel 1 que ya funcionaba. La solución final fue mantener la versión estable con fallback al grid base, aceptando que la IA en niveles 2 y 3 asume cierto riesgo al cruzar corredores. Una solución completa requeriría lógica de ventana temporal explícita, que quedó fuera del alcance del laboratorio.
+
+---
+### 6. Trabajo en equipo
+
+**Qué hicimos bien**
+
+- Mantuvimos commits frecuentes y descriptivos en nuestras ramas, con integración periódica a `main` solo cuando el código estaba probado.
+- Dividimos responsabilidades claras: diseño de niveles y configuración `.txt` por un lado, lógica de dominio y pruebas por otro.
+**Compromisos de mejora**
+- Escribir las pruebas *antes* del código (TDD estricto) en lugar de hacerlo en paralelo, para guiar mejor el diseño de interfaces.
+---
+### 7. Referencias
+
+- Oracle. (2024). *Java SE 21 API Specification*. https://docs.oracle.com/en/java/docs/books/jls/
+- JUnit Team. (2024). *JUnit 5 User Guide*. https://junit.org/junit5/docs/current/user-guide/
+- Gamma, E., Helm, R., Johnson, R., & Vlissides, J. (1994). *Design Patterns: Elements of Reusable Object-Oriented Software*. Addison-Wesley.
+- Snook, G. (2000). Simplified 3D movement and pathfinding using naviga *Game Programming Gems* (pp. 288–304). Charles River Media. *(referencia conceptual para BFS en grillas de videojuego)*
+---
+
+
