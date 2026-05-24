@@ -119,7 +119,73 @@ The-DOPO-Hardest-Game/
 └── lib/
     └── junit-platform-console-standalone-1.10.2.jar
 ```
+## Guía de comandos — ejecutar desde consola
 
+> **Requisito:** JDK 21 o superior instalado y en el PATH.  
+> Todos los comandos se ejecutan desde la raíz del repositorio.
+
+### 1. Clonar el repositorio
+
+```bash
+git clone <url-del-repositorio>
+cd The-DOPO-Hardest-Game
+```
+
+### 2. Compilar el juego
+
+**Linux / macOS (bash):**
+```bash
+mkdir -p out && javac -cp lib/junit-platform-console-standalone-1.10.2.jar -d out $(find src -name "*.java" ! -path "*/test/*")
+```
+
+**Windows (PowerShell):**
+```powershell
+New-Item -ItemType Directory -Force out | Out-Null; javac -cp "lib/junit-platform-console-standalone-1.10.2.jar" -d out (Get-ChildItem -Recurse -Path src -Filter "*.java" | Where-Object { $_.FullName -notlike "*\test\*" } | Select-Object -ExpandProperty FullName)
+```
+
+### 3. Ejecutar el juego
+
+**Linux / macOS:**
+```bash
+java -cp out presentation.TheDOPOHardestGameGUI
+```
+
+**Windows (PowerShell):**
+```powershell
+java -cp out presentation.TheDOPOHardestGameGUI
+```
+
+### 4. Compilar incluyendo los tests
+
+**Linux / macOS:**
+```bash
+javac -cp lib/junit-platform-console-standalone-1.10.2.jar -d out $(find src -name "*.java")
+```
+
+**Windows (PowerShell):**
+```powershell
+javac -cp "lib/junit-platform-console-standalone-1.10.2.jar" -d out (Get-ChildItem -Recurse -Path src -Filter "*.java" | Select-Object -ExpandProperty FullName)
+```
+
+### 5. Ejecutar los tests
+
+**Linux / macOS:**
+```bash
+java -cp out:lib/junit-platform-console-standalone-1.10.2.jar \
+     org.junit.platform.console.ConsoleLauncher \
+     --scan-classpath \
+     --include-package test
+```
+
+**Windows (PowerShell):**
+```powershell
+java -cp "out;lib/junit-platform-console-standalone-1.10.2.jar" `
+     org.junit.platform.console.ConsoleLauncher `
+     --scan-classpath `
+     --include-package test
+```
+
+---
 ---
 ##   informe PMD:
 
@@ -377,73 +443,6 @@ Criterios aplicados al escribir los tests:
 - **Solo se probó lo que realmente faltaba** — no se duplicaron tests existentes.
 - **Se priorizó por impacto** — primero las clases al 0%, luego las ramas no cubiertas.
 - **No se testeó la capa `presentation`** — código Swing/GUI no es comprobable con tests unitarios estándar.
----
-## Guía de comandos — ejecutar desde consola
-
-> **Requisito:** JDK 21 o superior instalado y en el PATH.  
-> Todos los comandos se ejecutan desde la raíz del repositorio.
-
-### 1. Clonar el repositorio
-
-```bash
-git clone <url-del-repositorio>
-cd The-DOPO-Hardest-Game
-```
-
-### 2. Compilar el juego
-
-**Linux / macOS (bash):**
-```bash
-mkdir -p out && javac -cp lib/junit-platform-console-standalone-1.10.2.jar -d out $(find src -name "*.java" ! -path "*/test/*")
-```
-
-**Windows (PowerShell):**
-```powershell
-New-Item -ItemType Directory -Force out | Out-Null; javac -cp "lib/junit-platform-console-standalone-1.10.2.jar" -d out (Get-ChildItem -Recurse -Path src -Filter "*.java" | Where-Object { $_.FullName -notlike "*\test\*" } | Select-Object -ExpandProperty FullName)
-```
-
-### 3. Ejecutar el juego
-
-**Linux / macOS:**
-```bash
-java -cp out presentation.TheDOPOHardestGameGUI
-```
-
-**Windows (PowerShell):**
-```powershell
-java -cp out presentation.TheDOPOHardestGameGUI
-```
-
-### 4. Compilar incluyendo los tests
-
-**Linux / macOS:**
-```bash
-javac -cp lib/junit-platform-console-standalone-1.10.2.jar -d out $(find src -name "*.java")
-```
-
-**Windows (PowerShell):**
-```powershell
-javac -cp "lib/junit-platform-console-standalone-1.10.2.jar" -d out (Get-ChildItem -Recurse -Path src -Filter "*.java" | Select-Object -ExpandProperty FullName)
-```
-
-### 5. Ejecutar los tests
-
-**Linux / macOS:**
-```bash
-java -cp out:lib/junit-platform-console-standalone-1.10.2.jar \
-     org.junit.platform.console.ConsoleLauncher \
-     --scan-classpath \
-     --include-package test
-```
-
-**Windows (PowerShell):**
-```powershell
-java -cp "out;lib/junit-platform-console-standalone-1.10.2.jar" `
-     org.junit.platform.console.ConsoleLauncher `
-     --scan-classpath `
-     --include-package test
-```
-
 ---
 
 ## Controles
