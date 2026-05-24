@@ -138,7 +138,7 @@ cd The-DOPO-Hardest-Game
 mkdir -p out && javac -cp lib/junit-platform-console-standalone-1.10.2.jar -d out $(find src -name "*.java" ! -path "*/test/*")
 ```
 
-**Windows (PowerShell):**
+**Windows (Terminal-PowerShell):**
 ```powershell
 New-Item -ItemType Directory -Force out | Out-Null; javac -cp "lib/junit-platform-console-standalone-1.10.2.jar" -d out (Get-ChildItem -Recurse -Path src -Filter "*.java" | Where-Object { $_.FullName -notlike "*\test\*" } | Select-Object -ExpandProperty FullName)
 ```
