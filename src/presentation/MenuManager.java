@@ -24,7 +24,6 @@ public class MenuManager extends JPanel {
     private final SeleccionMenu seleccion = new SeleccionMenu();
     private final Consumer<SeleccionMenu> alListo;
     private final Runnable alCargar;
-    private boolean hayPartidaGuardada = false;
     private JButton btnCargar;
 
     private int jugadorActual = 0; // 0 = J1, 1 = J2
@@ -48,14 +47,7 @@ public class MenuManager extends JPanel {
     }
 
     public void mostrarPrincipal() {
-        hayPartidaGuardada = new java.io.File("resources/saves/partida.txt").exists();
-        if (btnCargar != null) btnCargar.setVisible(hayPartidaGuardada);
         layout.show(cards, "principal");
-    }
-
-    public void marcarPartidaGuardada(boolean existe) {
-        hayPartidaGuardada = existe;
-        if (btnCargar != null) btnCargar.setVisible(existe);
     }
 
     // ── Pantalla 1: Principal ────────────────────────────────────────────────
@@ -71,7 +63,6 @@ public class MenuManager extends JPanel {
         p.add(Box.createVerticalStrut(15));
         btnCargar = boton("CARGAR PARTIDA", alCargar::run);
         btnCargar.setBackground(new Color(40, 120, 80));
-        btnCargar.setVisible(new java.io.File("resources/saves/partida.txt").exists());
         p.add(btnCargar);
         p.add(Box.createVerticalStrut(15));
         p.add(boton("SALIR",  () -> System.exit(0)));
