@@ -114,6 +114,7 @@ The-DOPO-Hardest-Game/
 │   ├── presentation/     # GUI Swing: TheDOPOHardestGameGUI, MenuManager, GamePanel, ...
 │   └── test/             # 11 clases de prueba JUnit 5
 ├── resources/
+│   ├── audio/  # Snayk_-_Growing_On_Me_01.09.2007__mp3.pm_.wav
 │   ├── configuraciones/  # nivel1.txt, nivel2.txt, nivel3.txt
 │   └── saves/            # partida.txt (generado al guardar)
 └── lib/
