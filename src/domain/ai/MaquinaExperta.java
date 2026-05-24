@@ -2,6 +2,7 @@ package domain.ai;
 
 import domain.collectibles.Moneda;
 import domain.core.Nivel;
+import domain.enemy.Enemigo;
 import domain.player.ControlJugador;
 import domain.player.Direction;
 import domain.player.Jugador;
@@ -11,22 +12,22 @@ import domain.world.ZonaInicial;
 
 import java.util.*;
 
-/**
- * IA experta: usa BFS para calcular la ruta óptima hacia las monedas
- * y luego hacia la ZonaInicial (su zona destino como jugador 1).
- */
 public class MaquinaExperta implements ControlJugador {
 
-    private static final int CELL  = 20; // píxeles por celda de la cuadrícula
-    private static final int UMBRAL = CELL;
+    private static final int CELL          = 20;
+    private static final int UMBRAL        = CELL;
+    private static final int RECALC_FRAMES = 25; // recalcula path cada N frames
+    private static final int MARGEN_ENEMIGO = 1; // celdas de buffer alrededor de enemigos
 
-    private boolean[][] bloqueado;
+    private boolean[][] baseGrid; // solo paredes (estático por nivel)
     private int gW, gH;
     private int nivelW = -1, nivelH = -1;
 
     private List<int[]> waypoints = new ArrayList<>();
-    private int wpIdx = 0;
-    private int targetPx = Integer.MIN_VALUE, targetPy = Integer.MIN_VALUE;
+    private int wpIdx    = 0;
+    private int targetPx = Integer.MIN_VALUE;
+    private int targetPy = Integer.MIN_VALUE;
+    private int frame    = 0;
 
     @Override
     public Direction decidirMovimiento(Nivel nivel) {
@@ -35,57 +36,40 @@ public class MaquinaExperta implements ControlJugador {
         Jugador yo = jugadores.get(1);
 
         if (nivelW != nivel.obtenerAncho() || nivelH != nivel.obtenerAlto()) {
-            construirGrid(nivel);
+            construirBaseGrid(nivel);
         }
+
+        boolean[][] grid = gridConEnemigos(nivel);
 
         int[] objetivo = encontrarObjetivo(nivel, yo);
         if (objetivo == null) return Direction.QUIETO;
 
-        if (objetivo[0] != targetPx || objetivo[1] != targetPy || waypoints.isEmpty()) {
-            targetPx = objetivo[0];
-            targetPy = objetivo[1];
-            waypoints = bfs(yo.obtenerPosX(), yo.obtenerPosY(), targetPx, targetPy);
-            wpIdx = 0;
+        frame++;
+        boolean nuevoObjetivo      = objetivo[0] != targetPx || objetivo[1] != targetPy;
+        boolean mismaCeldaObjetivo = (yo.obtenerPosX() / CELL == objetivo[0] / CELL)
+                                  && (yo.obtenerPosY() / CELL == objetivo[1] / CELL);
+        boolean necesitaRecalculo  = nuevoObjetivo
+                || (waypoints.isEmpty() && !mismaCeldaObjetivo)
+                || frame % RECALC_FRAMES == 0;
+
+        if (necesitaRecalculo) {
+            targetPx  = objetivo[0];
+            targetPy  = objetivo[1];
+            waypoints = bfs(yo.obtenerPosX(), yo.obtenerPosY(), targetPx, targetPy, grid);
+            wpIdx     = 0;
         }
 
         return navegar(yo);
     }
 
-    // ── Navegación por waypoints ─────────────────────────────────────────────
+    // ── Grid estático: solo paredes ──────────────────────────────────────────
 
-    private Direction navegar(Jugador yo) {
-        while (wpIdx < waypoints.size()) {
-            int[] wp = waypoints.get(wpIdx);
-            int cx = wp[0] * CELL + CELL / 2;
-            int cy = wp[1] * CELL + CELL / 2;
-            int dx = cx - yo.obtenerPosX();
-            int dy = cy - yo.obtenerPosY();
-            if (Math.abs(dx) < UMBRAL && Math.abs(dy) < UMBRAL) {
-                wpIdx++;
-                continue;
-            }
-            return dirFromDelta(dx, dy);
-        }
-        return Direction.QUIETO;
-    }
-
-    private Direction dirFromDelta(int dx, int dy) {
-        boolean r = dx > 2, l = dx < -2, u = dy < -2, d = dy > 2;
-        if (u) return Direction.NORTE;
-        if (d) return Direction.SUR;
-        if (r) return Direction.ESTE;
-        if (l) return Direction.OESTE;
-        return Direction.QUIETO;
-    }
-
-    // ── Cuadrícula de colisión ───────────────────────────────────────────────
-
-    private void construirGrid(Nivel nivel) {
+    private void construirBaseGrid(Nivel nivel) {
         nivelW = nivel.obtenerAncho();
         nivelH = nivel.obtenerAlto();
         gW = nivelW / CELL + 2;
         gH = nivelH / CELL + 2;
-        bloqueado = new boolean[gW][gH];
+        baseGrid = new boolean[gW][gH];
         for (Pared p : nivel.getParedes()) {
             int x0 = Math.max(0, p.obtenerPosX() / CELL);
             int y0 = Math.max(0, p.obtenerPosY() / CELL);
@@ -93,21 +77,40 @@ public class MaquinaExperta implements ControlJugador {
             int y1 = Math.min(gH - 1, (p.obtenerPosY() + p.obtenerAlto())  / CELL);
             for (int x = x0; x <= x1; x++)
                 for (int y = y0; y <= y1; y++)
-                    bloqueado[x][y] = true;
+                    baseGrid[x][y] = true;
         }
+    }
+
+    // ── Grid dinámico: paredes + margen alrededor de enemigos ────────────────
+
+    private boolean[][] gridConEnemigos(Nivel nivel) {
+        boolean[][] g = new boolean[gW][gH];
+        for (int x = 0; x < gW; x++)
+            g[x] = Arrays.copyOf(baseGrid[x], gH);
+        for (Enemigo e : nivel.getEnemigos()) {
+            int ex = e.obtenerPosX() / CELL;
+            int ey = e.obtenerPosY() / CELL;
+            for (int dx = -MARGEN_ENEMIGO; dx <= MARGEN_ENEMIGO + 1; dx++)
+                for (int dy = -MARGEN_ENEMIGO; dy <= MARGEN_ENEMIGO + 1; dy++) {
+                    int nx = ex + dx, ny = ey + dy;
+                    if (nx >= 0 && ny >= 0 && nx < gW && ny < gH)
+                        g[nx][ny] = true;
+                }
+        }
+        return g;
     }
 
     // ── Objetivo: moneda más cercana, luego ZonaInicial ──────────────────────
 
     private int[] encontrarObjetivo(Nivel nivel, Jugador yo) {
-        double best = Double.MAX_VALUE;
+        int bestDist = Integer.MAX_VALUE;
         int[] tgt = null;
         for (Moneda m : nivel.getMonedas()) {
             if (!m.estaRecolectada()) {
                 int cx = m.obtenerPosX() + m.obtenerAncho() / 2;
                 int cy = m.obtenerPosY() + m.obtenerAlto()  / 2;
-                double d = Math.hypot(cx - yo.obtenerPosX(), cy - yo.obtenerPosY());
-                if (d < best) { best = d; tgt = new int[]{cx, cy}; }
+                int dist = Math.abs(cx - yo.obtenerPosX()) + Math.abs(cy - yo.obtenerPosY());
+                if (dist < bestDist) { bestDist = dist; tgt = new int[]{cx, cy}; }
             }
         }
         if (tgt != null) return tgt;
@@ -122,9 +125,43 @@ public class MaquinaExperta implements ControlJugador {
         return null;
     }
 
-    // ── BFS en cuadrícula ────────────────────────────────────────────────────
+    // ── Navegación por waypoints ─────────────────────────────────────────────
 
-    private List<int[]> bfs(int startPx, int startPy, int endPx, int endPy) {
+    private Direction navegar(Jugador yo) {
+        while (wpIdx < waypoints.size()) {
+            int[] wp = waypoints.get(wpIdx);
+            int cx = wp[0] * CELL + CELL / 2;
+            int cy = wp[1] * CELL + CELL / 2;
+            int dx = cx - yo.obtenerPosX();
+            int dy = cy - yo.obtenerPosY();
+            if (Math.abs(dx) < UMBRAL && Math.abs(dy) < UMBRAL) { wpIdx++; continue; }
+            return dirFromDelta(dx, dy);
+        }
+        // Waypoints agotados o BFS misma celda: ajuste fino directo al objetivo en píxeles
+        if (targetPx != Integer.MIN_VALUE) {
+            int dx = targetPx - yo.obtenerPosX();
+            int dy = targetPy - yo.obtenerPosY();
+            if (Math.abs(dx) > 3 || Math.abs(dy) > 3) return dirFromDelta(dx, dy);
+        }
+        return Direction.QUIETO;
+    }
+
+    private Direction dirFromDelta(int dx, int dy) {
+        if (Math.abs(dy) >= Math.abs(dx)) {
+            return dy < 0 ? Direction.NORTE : Direction.SUR;
+        }
+        return dx > 0 ? Direction.ESTE : Direction.OESTE;
+    }
+
+    // ── BFS con grid dinámico; fallback a solo paredes si no hay ruta ────────
+
+    private List<int[]> bfs(int startPx, int startPy, int endPx, int endPy, boolean[][] grid) {
+        List<int[]> ruta = bfsGrid(startPx, startPy, endPx, endPy, grid);
+        if (!ruta.isEmpty()) return ruta;
+        return bfsGrid(startPx, startPy, endPx, endPy, baseGrid);
+    }
+
+    private List<int[]> bfsGrid(int startPx, int startPy, int endPx, int endPy, boolean[][] grid) {
         int sgx = clampX(startPx / CELL), sgy = clampY(startPy / CELL);
         int egx = clampX(endPx   / CELL), egy = clampY(endPy   / CELL);
         if (sgx == egx && sgy == egy) return Collections.emptyList();
@@ -148,7 +185,7 @@ public class MaquinaExperta implements ControlJugador {
             for (int d = 0; d < 4; d++) {
                 int nx = cx + dxArr[d], ny = cy + dyArr[d];
                 if (nx < 0 || ny < 0 || nx >= gW || ny >= gH) continue;
-                if (bloqueado[nx][ny]) continue;
+                if (grid[nx][ny]) continue;
                 int nIdx = ny * gW + nx;
                 if (from[nIdx] != -1) continue;
                 from[nIdx] = cur;

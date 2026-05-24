@@ -36,10 +36,13 @@ public class TheDOPOHardestGameGUI implements Runnable, KeyListener {
     private GamePanel panelJuego;
     private ControlPanel panelControl;
 
+    private static final String RUTA_MUSICA = "resources/audio/Snayk_-_Growing_On_Me_01.09.2007__mp3.pm_.wav";
+
     private TheDOPOHardestGame juego;
     private List<InputManager> inputManagers;
     private Thread hilo;
     private volatile boolean corriendo;
+    private final GestorSonido audio = new GestorSonido();
 
     public TheDOPOHardestGameGUI() {
         juego = new TheDOPOHardestGame();
@@ -84,6 +87,7 @@ public class TheDOPOHardestGameGUI implements Runnable, KeyListener {
         menu.mostrarPrincipal();
         layoutRaiz.show(contenedor, "menu");
         frame.setVisible(true);
+        audio.reproducir(RUTA_MUSICA);
     }
 
     private void iniciarJuegoConfigurado(SeleccionMenu sel) {
